@@ -121,6 +121,16 @@ const migrations: Migration[] = [
       "ALTER TABLE threads ADD COLUMN memory_message_count INTEGER DEFAULT 0",
     ],
   },
+  {
+    version: 14,
+    description: "Drop AI-related tables for Pure version",
+    up: `
+      DROP TABLE IF EXISTS threads;
+      DROP TABLE IF EXISTS messages;
+      DROP TABLE IF EXISTS chunks;
+      DROP TABLE IF EXISTS skills;
+    `,
+  },
 ];
 
 /** Run pending migrations */
