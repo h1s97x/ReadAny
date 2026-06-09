@@ -644,7 +644,6 @@ export const microsoftProvider: TranslationProvider = {
 /** Get a translator by name */
 export function getTranslator(name: TranslatorName): TranslationProvider | undefined {
   if (name === "microsoft") return microsoftProvider;
-  if (name === "ai") return aiProvider;
   if (name === "deepl") return deeplProvider;
   return undefined;
 }
