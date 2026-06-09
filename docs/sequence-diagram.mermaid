@@ -1,0 +1,35 @@
+sequenceDiagram
+    participant User as 用户
+    participant UI as 用户界面
+    participant ChatStore as chat-store
+    participant Agent as reading-agent
+    participant Context as reading-context
+    participant LLM as LLM Provider
+    participant RAG as RAG Module
+    participant DB as Database
+
+    User->>UI: 输入问题
+    UI->>ChatStore: sendMessage(message)
+    ChatStore->>Agent: invoke(userMessage)
+
+    Agent->>Context: getReadingContext()
+    Context->>DB: 获取当前位置/高亮/笔记
+    DB-->>Context: 返回上下文数据
+    Context-->>Agent: 返回格式化的上下文
+
+    Agent->>RAG: semanticSearch(query)
+    RAG->>DB: 向量搜索 + BM25
+    DB-->>RAG: 返回相关文本块
+    RAG-->>Agent: 返回引用来源
+
+    Agent->>LLM: chatCompletion(messages + context)
+    LLM-->>Agent: 流式响应
+
+    Agent->>ChatStore: 更新消息（流式）
+    ChatStore->>UI: 重新渲染
+    UI-->>User: 显示 AI 回复
+
+    Note over Agent,DB: 工具调用（如需要）
+    Agent->>DB: 执行工具（标注、笔记等）
+    DB-->>Agent: 操作结果
+    Agent->>LLM: 继续对话

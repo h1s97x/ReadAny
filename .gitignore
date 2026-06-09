@@ -46,3 +46,9 @@ readese/*
 # Local WebDAV test server
 webdav-server/
 theme-studio/.claude/settings.local.json
+
+# AI 相关（Pure 版本已移除）
+packages/core/src/ai/
+packages/core/src/rag/
+packages/app/src/components/chat/
+packages/app/src/components/rag/

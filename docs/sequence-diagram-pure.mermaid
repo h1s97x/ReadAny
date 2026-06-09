@@ -1,0 +1,76 @@
+sequenceDiagram
+    participant User as 用户
+    participant UI as 用户界面
+    participant ReaderStore as reader-store
+    participant SessionDetector as session-detector
+    participant DB as Database
+    participant Sync as 同步模块
+    participant WebDAV as WebDAV Server
+
+    Note over User,UI: 电子书导入流程
+    User->>UI: 拖入电子书文件
+    UI->>UI: 检测格式
+    alt EPUB
+        UI->>UI: parseEPUB(file)
+    else PDF/TXT/UMD
+        UI->>UI: convertToEPUB(file)
+    else MOBI/AZW
+        UI->>UI: parseMobi(file)
+    end
+    UI->>DB: insertBook(bookData)
+    DB-->>UI: 返回 bookId
+    UI-->>User: 显示书籍封面
+
+    Note over User,WebDAV: 阅读位置同步流程
+    User->>UI: 翻页/滚动
+    UI->>ReaderStore: updatePosition(cfi)
+    ReaderStore->>DB: updateBook(bookId, { position })
+    DB-->>ReaderStore: 更新成功
+
+    ReaderStore->>SessionDetector: recordActivity()
+    SessionDetector->>SessionDetector: 检测会话开始/结束
+    SessionDetector->>DB: insertReadingSession(session)
+
+    Note over ReaderStore,Sync: 如果启用了同步
+    ReaderStore->>Sync: syncBook(bookId)
+    Sync->>DB: 获取书籍数据（含 syncVersion）
+    Sync->>WebDAV: uploadBook(bookData)
+    WebDAV-->>Sync: 上传成功
+    Sync->>DB: updateBookSyncStatus(bookId, 'synced')
+
+    Note over User,DB: 标注与笔记流程
+    User->>UI: 选中文本 -> 添加高亮
+    UI->>DB: insertHighlight(highlightData)
+    DB-->>UI: 返回 highlightId
+    UI-->>User: 显示高亮
+
+    User->>UI: 点击高亮 -> 添加笔记
+    UI->>DB: insertNote(noteData)
+    DB-->>UI: 返回 noteId
+    UI->>DB: updateHighlight(highlightId, { note_id: noteId })
+    UI-->>User: 显示笔记
+
+    Note over User,DB: TTS 播放流程
+    User->>UI: 点击播放 TTS
+    UI->>UI: 获取当前页文本
+    UI->>UI: 调用 Edge TTS API
+    UI-->>User: 播放语音
+
+    Note over User,WebDAV: 标注导出流程
+    User->>UI: 选择导出格式（Markdown）
+    UI->>DB: getHighlightsByBookId(bookId)
+    DB-->>UI: 返回高亮列表
+    UI->>UI: 格式化为 Markdown
+    UI-->>User: 下载 Markdown 文件
+
+    Note over User,WebDAV: WebDAV 同步流程
+    User->>UI: 点击同步按钮
+    UI->>Sync: startSync()
+    Sync->>DB: 获取待同步数据（sync_status = 'pending'）
+    loop 每个待同步项目
+        Sync->>WebDAV: upload(data)
+        WebDAV-->>Sync: 上传成功
+        Sync->>DB: updateSyncStatus(id, 'synced')
+    end
+    Sync-->>UI: 同步完成
+    UI-->>User: 显示同步成功

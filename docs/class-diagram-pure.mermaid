@@ -1,0 +1,163 @@
+classDiagram
+    class AppStore {
+        +theme: string
+        +language: string
+        +fontSize: number
+        +setTheme(theme: string): void
+        +setLanguage(language: string): void
+    }
+
+    class ReaderStore {
+        +currentBook: Book | null
+        +currentPosition: string
+        +isReading: boolean
+        +setBook(book: Book): void
+        +updatePosition(position: string): void
+        +closeReader(): void
+    }
+
+    class AnnotationStore {
+        +highlights: Highlight[]
+        +notes: Note[]
+        +addHighlight(highlight: Highlight): void
+        +removeHighlight(id: string): void
+        +addNote(note: Note): void
+        +removeNote(id: string): void
+    }
+
+    class TTSStore {
+        +isPlaying: boolean
+        +currentText: string
+        +rate: number
+        +play(text: string): void
+        +pause(): void
+        +stop(): void
+        +setRate(rate: number): void
+    }
+
+    class SyncStore {
+        +isSyncing: boolean
+        +lastSyncTime: Date | null
+        +syncStatus: string
+        +startSync(): Promise~void~
+        +getSyncStatus(): string
+    }
+
+    class ReadingSessionStore {
+        +sessions: ReadingSession[]
+        +currentSession: ReadingSession | null
+        +startSession(bookId: string): void
+        +endSession(): void
+        +getSessionsByBook(bookId: string): ReadingSession[]
+    }
+
+    class BookQueries {
+        +getBooks(): Promise~Book[]~
+        +getBookById(id: string): Promise~Book~
+        +insertBook(book: Book): Promise~string~
+        +updateBook(id: string, data: Partial~Book~): Promise~void~
+        +deleteBook(id: string): Promise~void~
+    }
+
+    class HighlightQueries {
+        +getHighlightsByBookId(bookId: string): Promise~Highlight[]~
+        +insertHighlight(highlight: Highlight): Promise~string~
+        +deleteHighlight(id: string): Promise~void~
+    }
+
+    class NoteQueries {
+        +getNotesByBookId(bookId: string): Promise~Note[]~
+        +insertNote(note: Note): Promise~string~
+        +updateNote(id: string, content: string): Promise~void~
+        +deleteNote(id: string): Promise~void~
+    }
+
+    class ReadingSessionQueries {
+        +getSessionsByBookId(bookId: string): Promise~ReadingSession[]~
+        +insertSession(session: ReadingSession): Promise~string~
+        +updateSession(id: string, data: Partial~ReadingSession~): Promise~void~
+    }
+
+    class SyncService {
+        +uploadBook(book: Book): Promise~void~
+        +downloadBook(bookId: string): Promise~Book~
+        +uploadHighlight(highlight: Highlight): Promise~void~
+        +downloadHighlight(highlightId: string): Promise~Highlight~
+    }
+
+    class TTSService {
+        +speak(text: string, options: TTSOptions): Promise~void~
+        +pause(): void
+        +resume(): void
+        +stop(): void
+    }
+
+    class ExportService {
+        +exportToMarkdown(bookId: string): Promise~string~
+        +exportToHTML(bookId: string): Promise~string~
+        +exportToJSON(bookId: string): Promise~string~
+        +exportToObsidian(bookId: string): Promise~string~
+    }
+
+    class StatsService {
+        +getReadingTimeByDate(days: number): Promise~Object~
+        +getHeatmapData(year: number): Promise~Object~
+        +getStreak(): Promise~number~
+    }
+
+    class Book {
+        +id: string
+        +title: string
+        +author: string
+        +coverPath: string
+        +filePath: string
+        +format: string
+        +position: string
+        +progress: number
+        +addedAt: Date
+    }
+
+    class Highlight {
+        +id: string
+        +bookId: string
+        +cfiRange: string
+        +text: string
+        +color: string
+        +noteId: string | null
+        +createdAt: Date
+    }
+
+    class Note {
+        +id: string
+        +bookId: string
+        +content: string
+        +markdown: string
+        +createdAt: Date
+        +updatedAt: Date
+    }
+
+    class ReadingSession {
+        +id: string
+        +bookId: string
+        +duration: number
+        +startTime: Date
+        +endTime: Date
+    }
+
+    AppStore --> ReaderStore : 影响
+    ReaderStore --> Book : 使用
+    AnnotationStore --> Highlight : 管理
+    AnnotationStore --> Note : 管理
+    TTSStore --> TTSService : 调用
+    SyncStore --> SyncService : 调用
+    ReadingSessionStore --> ReadingSession : 管理
+
+    BookQueries --> Book : CRUD
+    HighlightQueries --> Highlight : CRUD
+    NoteQueries --> Note : CRUD
+    ReadingSessionQueries --> ReadingSession : CRUD
+
+    SyncService --> WebDAV : 访问
+    ExportService --> Highlight : 读取
+    ExportService --> Note : 读取
+    StatsService --> ReadingSession : 分析

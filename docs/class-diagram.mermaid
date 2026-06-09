@@ -1,0 +1,91 @@
+erDiagram
+    books ||--o{ highlights : "has"
+    books ||--o{ notes : "has"
+    books ||--o{ bookmarks : "has"
+    books ||--o{ threads : "has"
+    books ||--o{ chunks : "has"
+    books ||--o{ reading_sessions : "has"
+    threads ||--o{ messages : "has"
+    books ||--o{ skills : "has"
+
+    books {
+        string id PK
+        string title
+        string author
+        string cover_path
+        string file_path
+        string file_hash
+        string format
+        string position
+        float progress
+        int file_size
+        date added_at
+        date updated_at
+        int sync_version
+        string sync_status
+    }
+
+    highlights {
+        string id PK
+        string book_id FK
+        string cfi_range
+        string text
+        string color
+        string note_id FK
+        date created_at
+        int sync_version
+    }
+
+    notes {
+        string id PK
+        string book_id FK
+        string content
+        string markdown
+        date created_at
+        date updated_at
+        int sync_version
+    }
+
+    threads {
+        string id PK
+        string book_id FK
+        string title
+        string memory
+        date created_at
+        date updated_at
+    }
+
+    messages {
+        string id PK
+        string thread_id FK
+        string role
+        string content
+        string parts
+        date created_at
+    }
+
+    chunks {
+        string id PK
+        string book_id FK
+        string text
+        string embedding
+        int chunk_index
+        string cfi_range
+    }
+
+    reading_sessions {
+        string id PK
+        string book_id FK
+        int duration
+        date start_time
+        date end_time
+    }
+
+    skills {
+        string id PK
+        string name
+        string description
+        string prompt
+        boolean is_builtin
+        date created_at
+    }
