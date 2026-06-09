@@ -1,10 +1,8 @@
 import { MarkdownRenderer } from "@/components/chat/MarkdownRenderer";
 import { BookmarkRibbon } from "@/components/reader/BookmarkRibbon";
-import { ChapterTranslationSheet } from "@/components/reader/ChapterTranslationSheet";
 import { ReadingProgressSlider } from "@/components/reader/ReadingProgressSlider";
 import { SelectionPopover } from "@/components/reader/SelectionPopover";
 import { TTSPage } from "@/components/reader/TTSPage";
-import { TranslationPanel } from "@/components/reader/TranslationPanel";
 import {
   BookmarkFilledIcon,
   BookmarkIcon,
@@ -12,7 +10,6 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   HeadphonesIcon,
-  LanguagesIcon,
   NotebookPenIcon,
   SearchIcon,
   XIcon,
@@ -35,7 +32,6 @@ import { useTheme } from "@/styles/ThemeContext";
 import { useColors, withOpacity } from "@/styles/theme";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { runWithDbRetry } from "@readany/core/db/write-retry";
-import { useChapterTranslation } from "@readany/core/hooks";
 import { useReadingSession } from "@readany/core/hooks/use-reading-session";
 import { createSelectionNoteMutation } from "@readany/core/reader";
 import { getPlatformService } from "@readany/core/services";
@@ -222,10 +218,7 @@ export function ReaderScreen({ route, navigation }: Props) {
   const [showSettings, setShowSettings] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showNotebook, setShowNotebook] = useState(false);
-  const [showTranslation, setShowTranslation] = useState(false);
-  const [translationText, setTranslationText] = useState("");
   const [showTTS, setShowTTS] = useState(false);
-  const [showChapterTranslation, setShowChapterTranslation] = useState(false);
   const [isReimporting, setIsReimporting] = useState(false);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -235,7 +228,6 @@ export function ReaderScreen({ route, navigation }: Props) {
   const [toc, setToc] = useState<TOCItem[]>([]);
   const [bookTitle, setBookTitle] = useState("");
   const [webViewReady, setWebViewReady] = useState(false);
-  const [translationReady, setTranslationReady] = useState(false);
   const [readerHtmlUri, setReaderHtmlUri] = useState<string | null>(null);
   const [currentCfi, setCurrentCfi] = useState("");
   const [selection, setSelection] = useState<SelectionEvent | null>(null);
@@ -253,15 +245,6 @@ export function ReaderScreen({ route, navigation }: Props) {
     note: string;
     cfi: string;
     position: { x: number; y: number; selectionTop: number; selectionBottom: number };
-  } | null>(null);
-  const noteTooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const noteTooltipVisibleRef = useRef(false);
-  const suppressReaderTapUntilRef = useRef(0);
-  const assetLoadedRef = useRef(false);
-  // Mediator ref so onRelocate can fire TTS continuation without direct hook dependency
-  const ttsPendingContinueRef = useRef<{
-    pendingTTSContinueCallbackRef: React.RefObject<(() => void) | null>;
-    pendingTTSContinueSafetyTimerRef: React.RefObject<ReturnType<typeof setTimeout> | null>;
   } | null>(null);
 
   const bridgeRef = useRef<{
@@ -295,21 +278,8 @@ export function ReaderScreen({ route, navigation }: Props) {
     setTTSHighlight: (cfi: string | null, color?: string, force?: boolean) => void;
   } | null>(null);
 
-  // Chapter translation state
-  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
-  const chapterTranslationBridgeRef = useRef<{
-    getChapterParagraphs: () => Promise<Array<{ id: string; text: string; tagName: string }>>;
-    injectChapterTranslations: (
-      results: Array<{ paragraphId: string; originalText: string; translatedText: string }>,
-      visibility?: { originalVisible: boolean; translationVisible: boolean },
-    ) => Promise<void>;
-    removeChapterTranslations: () => void;
-  } | null>(null);
-
   const readSettings = useSettingsStore((s) => s.readSettings);
   const updateReadSettings = useSettingsStore((s) => s.updateReadSettings);
-  const translationConfig = useSettingsStore((s) => s.translationConfig);
-  const aiConfig = useSettingsStore((s) => s.aiConfig);
   const settingViewMode = readSettings.viewMode;
   const showTopTitleProgress = readSettings.showTopTitleProgress !== false;
   const showBottomTimeBattery = readSettings.showBottomTimeBattery !== false;
@@ -443,62 +413,6 @@ export function ReaderScreen({ route, navigation }: Props) {
     totalBookCharactersRef.current = null;
     suppressProgressTracking(INITIAL_PROGRESS_RESTORE_GUARD_MS);
   }, [bookId]);
-  const chapterTranslation = useChapterTranslation({
-    bookId,
-    sectionIndex: currentSectionIndex,
-    aiConfig,
-    ready: translationReady,
-    translationConfig,
-    getParagraphs: async () => {
-      if (!chapterTranslationBridgeRef.current) return [];
-      return chapterTranslationBridgeRef.current.getChapterParagraphs();
-    },
-    injectTranslations: (results, visibility) => {
-      return chapterTranslationBridgeRef.current?.injectChapterTranslations(results, visibility);
-    },
-    removeTranslations: () => {
-      chapterTranslationBridgeRef.current?.removeChapterTranslations();
-    },
-    applyVisibility: (originalVisible, translationVisible) => {
-      const translationHidden = !translationVisible;
-      const originalHidden = !originalVisible;
-      const solo = !originalVisible && translationVisible;
-      bridge.webViewRef.current?.injectJavaScript(`
-        (function() {
-          try {
-            var doc = null;
-            var renderer = typeof view !== 'undefined' && view && view.renderer;
-            if (renderer && renderer.getContents) {
-              var contents = renderer.getContents();
-              if (contents && contents[0] && contents[0].doc) doc = contents[0].doc;
-            }
-            if (!doc) {
-              var iframes = document.querySelectorAll('iframe');
-              for (var fi = 0; fi < iframes.length; fi++) {
-                try {
-                  var iframeDoc = iframes[fi].contentDocument || (iframes[fi].contentWindow && iframes[fi].contentWindow.document);
-                  if (iframeDoc && iframeDoc.body) { doc = iframeDoc; break; }
-                } catch (e) {}
-              }
-            }
-            if (!doc) return;
-            var els = doc.querySelectorAll('.readany-translation');
-            for (var i = 0; i < els.length; i++) {
-              els[i].setAttribute('data-hidden', '${translationHidden}');
-              els[i].setAttribute('data-solo', '${solo}');
-            }
-            var origEls = doc.querySelectorAll('[data-translate-id]');
-            for (var j = 0; j < origEls.length; j++) {
-              origEls[j].setAttribute('data-original-hidden', '${originalHidden}');
-            }
-          } catch(e) {}
-        })();
-        true;
-      `);
-    },
-    getCurrentCfi: () => currentCfi,
-    goToCfi: (cfi) => bridgeRef.current?.goToCFI(cfi),
-  });
 
   useEffect(() => {
     progressRef.current = progress;
@@ -622,12 +536,10 @@ export function ReaderScreen({ route, navigation }: Props) {
       if (loading) {
         setLoading(false);
       }
-      // Track section changes for chapter translation reset
+      // Track section changes
       const newSection = detail.section?.current ?? 0;
       if (newSection !== currentSectionIndex) {
         setCurrentSectionIndex(newSection);
-        setTranslationReady(false);
-        chapterTranslation.reset();
       }
 
       if (detail.fraction != null) setProgress(detail.fraction);
@@ -735,9 +647,6 @@ export function ReaderScreen({ route, navigation }: Props) {
         // Use throttled save instead of immediate update
         throttledSaveProgress(bookId, detail.fraction ?? 0, detail.cfi);
       }
-
-      // Mark translation ready after first successful relocate (CFI navigation done)
-      if (!translationReady) setTranslationReady(true);
 
       // If TTS is waiting for a page turn to complete, fire the continuation callback now
       // that the renderer has fully updated its position (renderer.start reflects new page).
@@ -880,7 +789,6 @@ export function ReaderScreen({ route, navigation }: Props) {
   });
 
   bridgeRef.current = bridge;
-  chapterTranslationBridgeRef.current = bridge;
 
   // ── useReaderTTS ──
   const tts = useReaderTTS({
@@ -1375,7 +1283,7 @@ export function ReaderScreen({ route, navigation }: Props) {
     outputRange: [1, 0.24, 0],
   });
 
-  const isPanelOpen = showTOC || showSettings || showSearch || showNotebook || showTranslation;
+  const isPanelOpen = showTOC || showSettings || showSearch || showNotebook;
   const existingSelectionHighlight = selection
     ? (highlights.find((highlight) => highlight.bookId === bookId && highlight.cfi === selection.cfi) ??
       null)
@@ -1599,10 +1507,6 @@ export function ReaderScreen({ route, navigation }: Props) {
               note: mutation.updates.note,
             });
           }}
-          onTranslate={(text) => {
-            setShowTranslation(true);
-            setTranslationText(text);
-          }}
           existingHighlight={
             existingSelectionHighlight
               ? {
@@ -1697,16 +1601,6 @@ export function ReaderScreen({ route, navigation }: Props) {
             },
           ]}
         >
-          <TouchableOpacity
-            style={[
-              s.floatingToolBtn,
-              (showChapterTranslation || chapterTranslation.state.status !== "idle") &&
-                s.floatingToolBtnActive,
-            ]}
-            onPress={() => setShowChapterTranslation(true)}
-          >
-            <LanguagesIcon size={18} color="#fff" />
-          </TouchableOpacity>
           <TouchableOpacity
             style={[
               s.floatingToolBtn,
@@ -2070,29 +1964,6 @@ export function ReaderScreen({ route, navigation }: Props) {
           setNoteViewHighlight({ ...highlight, note: newNote });
           setNoteViewEditing(false);
         }}
-      />
-
-      {/* ─── Translation Panel ─── */}
-      {showTranslation && translationText && (
-        <TranslationPanel
-          text={translationText}
-          onClose={() => {
-            setShowTranslation(false);
-            setTranslationText("");
-          }}
-        />
-      )}
-
-      {/* ─── Chapter Translation Sheet ─── */}
-      <ChapterTranslationSheet
-        visible={showChapterTranslation}
-        onClose={() => setShowChapterTranslation(false)}
-        state={chapterTranslation.state}
-        onStart={chapterTranslation.startTranslation}
-        onCancel={chapterTranslation.cancelTranslation}
-        onToggleOriginalVisible={chapterTranslation.toggleOriginalVisible}
-        onToggleTranslationVisible={chapterTranslation.toggleTranslationVisible}
-        onReset={chapterTranslation.reset}
       />
 
       <TTSPage
