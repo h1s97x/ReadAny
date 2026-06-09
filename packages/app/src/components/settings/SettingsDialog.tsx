@@ -7,7 +7,6 @@ import { refreshAndCountUnreadFeedback } from "@readany/core/feedback";
 import { cn } from "@readany/core/utils";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AISettings } from "./AISettings";
 import { AboutSettings } from "./AboutSettings";
 import { FeedbackSettings } from "./FeedbackSettings";
 import { FontSettings } from "./FontSettings";
@@ -16,7 +15,6 @@ import { ReadSettingsPanel } from "./ReadSettings";
 import { SyncSettings } from "./SyncSettings";
 import { TTSSettings } from "./TTSSettings";
 import { TranslationSettings } from "./TranslationSettings";
-import { VectorModelSettings } from "./VectorModelSettings";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -27,8 +25,6 @@ const TAB_IDS: SettingsTab[] = [
   "general",
   "reading",
   "fonts",
-  "ai",
-  "vectorModel",
   "tts",
   "translation",
   "sync",
@@ -39,8 +35,6 @@ const TAB_KEYS: Record<SettingsTab, string> = {
   general: "settings.general",
   reading: "settings.reading",
   fonts: "settings.fonts",
-  ai: "settings.ai",
-  vectorModel: "settings.vectorModel",
   tts: "settings.tts",
   translation: "settings.translationTab",
   sync: "settings.sync",
@@ -110,13 +104,11 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
             </nav>
           </div>
 
-          {/* Content */}
+            {/* Content */}
           <div className="min-w-0 flex-1 overflow-y-auto">
             {settingsTab === "general" && <GeneralSettings />}
             {settingsTab === "reading" && <ReadSettingsPanel />}
             {settingsTab === "fonts" && <FontSettings />}
-            {settingsTab === "ai" && <AISettings />}
-            {settingsTab === "vectorModel" && <VectorModelSettings />}
             {settingsTab === "tts" && <TTSSettings />}
             {settingsTab === "translation" && <TranslationSettings />}
             {settingsTab === "sync" && <SyncSettings />}

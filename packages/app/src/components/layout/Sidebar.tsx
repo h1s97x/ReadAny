@@ -95,15 +95,13 @@ export function HomeSidebar() {
   const activeTab = useAppStore((s) => s.tabs.find((t) => t.id === activeTabId));
   const activeType = activeTab?.type ?? "home";
 
-  const handleNavClick = (tabType: "home" | "chat" | "notes" | "skills") => {
+  const handleNavClick = (tabType: "home" | "notes") => {
     if (tabType === "home") {
       setActiveTab("home");
     } else {
       // Add the tab if it doesn't exist, then activate
-      // Use translated title for the tab
-      const item = NAV_ITEMS.find((n) => n.tabType === tabType);
-      const title = item ? t(item.labelKey) : tabType;
-      addTab({ id: tabType, type: tabType, title });
+      const title = t(NNAV_ITEMS.find((n) => n.tabType === tabType)?.labelKey || tabType);
+      addTab({ id: tabType, type: tabType as "home", title });
       setActiveTab(tabType);
     }
   };

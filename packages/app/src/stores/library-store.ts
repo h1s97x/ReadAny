@@ -1,5 +1,4 @@
 import * as db from "@/lib/db/database";
-import { triggerVectorizeBook } from "@/lib/rag/vectorize-trigger";
 import {
   getDesktopLibraryRoot,
   isDesktopManagedRelativePath,

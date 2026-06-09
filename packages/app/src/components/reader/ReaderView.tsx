@@ -1,4 +1,3 @@
-import { ChatPanel } from "@/components/chat/ChatPanel";
 /**
  * ReaderView — main reader page component.
  *
@@ -715,7 +714,6 @@ export function ReaderView({ bookId, tabId }: ReaderViewProps) {
   const [searchIndex, setSearchIndex] = useState<number>(0);
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
-  const [showChat, setShowChat] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showTTS, setShowTTS] = useState(false);
   const [isReimporting, setIsReimporting] = useState(false);
@@ -731,12 +729,6 @@ export function ReaderView({ bookId, tabId }: ReaderViewProps) {
   });
 
   // Resizable panel widths
-  const chatPanel = useResizablePanel({
-    storageKey: "reader-chat-panel-width",
-    defaultWidth: 320,
-    minWidth: 200,
-    maxWidth: 600,
-  });
   const tocPanel = useResizablePanel({
     storageKey: "reader-toc-panel-width",
     defaultWidth: 300,
@@ -1632,38 +1624,15 @@ export function ReaderView({ bookId, tabId }: ReaderViewProps) {
 
   const handleAskAI = useCallback(() => {
     if (selection?.text) {
-      // Store in sessionStorage in case ChatPanel is not mounted yet
-      // ChatPanel will check and consume this on mount
-      sessionStorage.setItem(
-        `pending-ai-quote-${bookId}`,
-        JSON.stringify({
-          selectedText: selection.text,
-          bookId,
-          chapterTitle: readerTab?.chapterTitle,
-        }),
-      );
-
-      // Open chat panel
-      setShowChat(true);
-
-      // Also dispatch event for immediate handling if panel is already open
-      window.dispatchEvent(
-        new CustomEvent("ask-ai-from-reader", {
-          detail: {
-            selectedText: selection.text,
-            bookId,
-            chapterTitle: readerTab?.chapterTitle,
-          },
-        }),
-      );
+      // AI ask feature removed in Pure version
+      toast.info("AI features have been removed from ReadAny Pure");
     }
     setSelection(null);
-  }, [selection, bookId, readerTab?.chapterTitle]);
+  }, [selection]);
 
   const handleCloseSelection = useCallback(() => setSelection(null), []);
   const handleToggleSearch = useCallback(() => setShowSearch((p) => !p), []);
   const handleToggleToc = useCallback(() => setShowToc((p) => !p), []);
-  const handleToggleChat = useCallback(() => setShowChat((p) => !p), []);
   const handleToggleSettings = useCallback(() => setShowSettings((p) => !p), []);
 
   useEffect(() => {
@@ -2880,7 +2849,6 @@ export function ReaderView({ bookId, tabId }: ReaderViewProps) {
             onToggleOriginalVisible={chapterTranslation.toggleOriginalVisible}
             onToggleTranslationVisible={chapterTranslation.toggleTranslationVisible}
             onChapterTranslationReset={chapterTranslation.reset}
-            isChatOpen={showChat}
             isTTSActive={showTTS || ttsPlayState !== "stopped"}
             isFixedLayout={isFixedLayout}
             isPinned={isToolbarPinned}
@@ -2981,34 +2949,8 @@ export function ReaderView({ bookId, tabId }: ReaderViewProps) {
         )}
       </div>
 
-      {/* AI Chat sidebar — RIGHT side, resizable */}
-      {showChat && (
-        <div
-          className="relative ml-1 flex shrink-0 flex-col overflow-hidden rounded-lg border border-border/60 bg-background shadow-sm"
-          style={{ width: chatPanel.width }}
-        >
-          <ResizeHandle
-            side="left"
-            onResizeStart={chatPanel.handleResizeStart}
-            onResize={(delta) => chatPanel.handleResize(delta, "left")}
-            onResizeEnd={chatPanel.handleResizeEnd}
-          />
-          <div className="flex h-10 shrink-0 items-center justify-between border-b border-border/40 px-3">
-            <span className="text-xs font-medium text-foreground">{t("chat.aiAssistant")}</span>
-            <button
-              type="button"
-              className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              onClick={() => setShowChat(false)}
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <ChatPanel book={book} onNavigateToCitation={handleNavigateToCitation} />
-          </div>
-        </div>
-      )}
-    </div>
+      {/* Notebook sidebar — RIGHT side, resizable */}
+      <div
   );
 }
 

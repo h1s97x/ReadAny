@@ -12,10 +12,9 @@
  * When the user switches back to a hibernated tab, it is re-mounted and the
  * reader restores to the previously recorded CFI position automatically.
  *
- * Home-type pages (home/chat/notes/skills/stats) share the left sidebar.
+ * Home-type pages (home/notes/stats) share the left sidebar.
  * Reader pages are full-width (no sidebar).
  */
-import { ChatPage as ChatPageComponent } from "@/components/chat/ChatPage";
 import { CommandPalette } from "@/components/command-palette/CommandPalette";
 import { HomePage } from "@/components/home/HomePage";
 import { NotesPage } from "@/components/notes/NotesPage";
@@ -25,7 +24,6 @@ import { SettingsDialog } from "@/components/settings/SettingsDialog";
 import { MissingBookPromptDialog } from "@/components/shared/MissingBookPromptDialog";
 import { ReadingStatsPanel } from "@/components/stats/ReadingStatsPanel";
 import { FloatingTTSBubble } from "@/components/tts/FloatingTTSBubble";
-import SkillsPage from "@/pages/Skills";
 import { useAppStore } from "@/stores/app-store";
 import { useLibraryStore } from "@/stores/library-store";
 import { useReaderStore } from "@/stores/reader-store";
@@ -40,9 +38,7 @@ import { TabBar } from "./TabBar";
 /** All home sub-views — each stays mounted and uses display:none to toggle. */
 const HOME_VIEWS: { id: string; Component: React.ComponentType }[] = [
   { id: "home", Component: HomePage },
-  { id: "chat", Component: ChatPageComponent },
   { id: "notes", Component: NotesPage },
-  { id: "skills", Component: SkillsPage },
   { id: "stats", Component: ReadingStatsPanel },
 ];
 
