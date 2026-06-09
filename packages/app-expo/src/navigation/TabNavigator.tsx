@@ -1,13 +1,11 @@
-import { BookOpenIcon, MessageSquareIcon, NotebookPenIcon, UserIcon } from "@/components/ui/Icon";
+import { BookOpenIcon, NotebookPenIcon, UserIcon } from "@/components/ui/Icon";
 import { useResponsiveLayout } from "@/hooks/use-responsive-layout";
-import { ChatScreen } from "@/screens/ChatScreen";
 import { LibraryScreen } from "@/screens/LibraryScreen";
 import { NotesScreen } from "@/screens/NotesScreen";
 import { ProfileScreen } from "@/screens/ProfileScreen";
 import { useTheme } from "@/styles/ThemeContext";
 /**
- * TabNavigator — bottom tab bar matching the Tauri mobile app's 4 tabs.
- * Icons: BookOpen, MessageSquare, NotebookPen, User (matching BottomTabBar.tsx)
+ * TabNavigator — bottom tab bar with 3 tabs: Library, Notes, Profile.
  */
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useTranslation } from "react-i18next";
@@ -16,7 +14,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export type TabParamList = {
   Library: undefined;
-  Chat: undefined;
   Notes: { bookId?: string } | undefined;
   Profile: undefined;
 };
@@ -81,14 +78,6 @@ export function TabNavigator() {
         options={{
           tabBarLabel: t("tabs.library", "书架"),
           tabBarIcon: ({ color, size }) => <BookOpenIcon color={color} size={size} />,
-        }}
-      />
-      <Tab.Screen
-        name="Chat"
-        component={ChatScreen}
-        options={{
-          tabBarLabel: t("tabs.ai", "AI"),
-          tabBarIcon: ({ color, size }) => <MessageSquareIcon color={color} size={size} />,
         }}
       />
       <Tab.Screen

@@ -4,24 +4,6 @@
  * Initialises platform service, i18n, and mounts navigation.
  */
 
-// Polyfill AbortSignal.throwIfAborted — missing in Hermes, required by LangChain
-if (typeof AbortSignal !== "undefined" && !AbortSignal.prototype.throwIfAborted) {
-  AbortSignal.prototype.throwIfAborted = function () {
-    if (this.aborted) {
-      const err = this.reason ?? new Error("The operation was aborted.");
-      throw err;
-    }
-  };
-}
-
-// Polyfill navigator.userAgent for LangChain — React Native doesn't have userAgent
-if (typeof navigator !== "undefined" && !navigator.userAgent) {
-  Object.defineProperty(navigator, "userAgent", {
-    get: () => "ReactNative",
-    configurable: true,
-  });
-}
-
 import { DarkTheme, DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -32,7 +14,6 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AnimatedSplash } from "@/components/splash/AnimatedSplash";
 import { rnSessionEventSource } from "@/hooks";
-import { setStreamingFetch } from "@readany/core/ai/llm-provider";
 import { initDatabase } from "@readany/core/db/database";
 import { installFeedbackLogCapture, setFeedbackWorkerUrl } from "@readany/core/feedback";
 import { setSessionEventSource } from "@readany/core/hooks/use-reading-session";
@@ -102,10 +83,6 @@ export default function App() {
 
         console.log("[App] bootstrap: init language");
         await initI18nLanguage();
-
-        console.log("[App] bootstrap: import expo/fetch");
-        const { fetch: expoFetch } = await import("expo/fetch");
-        setStreamingFetch(expoFetch as typeof globalThis.fetch);
 
         console.log("[App] bootstrap: configure audio mode");
         await Audio.setAudioModeAsync({

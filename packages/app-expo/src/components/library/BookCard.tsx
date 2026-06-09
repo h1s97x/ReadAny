@@ -3,7 +3,7 @@ import { useColors } from "@/styles/theme";
 import { getPlatformService } from "@readany/core/services";
 /**
  * BookCard — Touch-optimized book card matching Tauri mobile MobileBookCard exactly.
- * Cover (28:41), progress bar, vectorization overlay, tag badges, long-press action sheet.
+ * Cover (28:41), progress bar, tag badges, long-press action sheet.
  */
 import type { Book } from "@readany/core/types";
 import { getBookProgressPercent } from "@readany/core/utils";
@@ -53,10 +53,6 @@ interface BookCardProps {
   onDelete: (bookId: string, options?: { preserveData?: boolean }) => void;
   onShowDetails?: (book: Book) => void;
   onManageTags?: (book: Book) => void;
-  onVectorize?: (book: Book) => void;
-  isVectorizing?: boolean;
-  isQueued?: boolean;
-  vectorProgress?: { status: string; processedChunks: number; totalChunks: number } | null;
   downloadProgress?: { downloaded: number; total: number } | null;
   cardWidth?: number;
   isSelectionMode?: boolean;
@@ -71,10 +67,6 @@ export const BookCard = memo(function BookCard({
   onDelete,
   onShowDetails,
   onManageTags,
-  onVectorize,
-  isVectorizing,
-  isQueued,
-  vectorProgress,
   downloadProgress,
   cardWidth = 96,
   isSelectionMode = false,
@@ -118,12 +110,6 @@ export const BookCard = memo(function BookCard({
   }, [book.meta.coverUrl]);
 
   const progressPct = getBookProgressPercent(book.progress);
-
-  const vecPct = vectorProgress
-    ? vectorProgress.totalChunks > 0
-      ? Math.round((vectorProgress.processedChunks / vectorProgress.totalChunks) * 100)
-      : 0
-    : 0;
 
   const measureAnchor = useCallback(async () => {
     const measureNode = (node: View | null, fallbackToBottomRight = false) =>
@@ -286,34 +272,6 @@ export const BookCard = memo(function BookCard({
             </View>
           )}
 
-          {/* Vectorization progress overlay */}
-          {isVectorizing && (
-            <View style={s.vecOverlay}>
-              <AnimatedLoader />
-              <Text style={s.vecOverlayText}>
-                {vectorProgress?.status === "chunking"
-                  ? `${vecPct}%`
-                  : vectorProgress?.status === "embedding"
-                    ? `${vecPct}%`
-                    : vectorProgress?.status === "indexing"
-                      ? t("home.vec_indexing")
-                      : vectorProgress?.status === "completed"
-                        ? "✓"
-                        : vectorProgress?.status === "error"
-                          ? "✗"
-                          : t("home.vec_processing")}
-              </Text>
-            </View>
-          )}
-
-          {/* Queued overlay */}
-          {isQueued && !isVectorizing && (
-            <View style={s.queuedOverlay}>
-              <ClockIcon size={20} color="#fff" />
-              <Text style={s.queuedOverlayText}>{t("home.vec_queued", "排队中")}</Text>
-            </View>
-          )}
-
           {/* Remote status overlay (on-demand download) */}
           {book.syncStatus === "remote" && (
             <View style={s.remoteOverlay}>
@@ -331,13 +289,6 @@ export const BookCard = memo(function BookCard({
                   {Math.round((downloadProgress.downloaded / downloadProgress.total) * 100)}%
                 </Text>
               )}
-            </View>
-          )}
-
-          {/* Vectorized badge */}
-          {book.isVectorized && !isVectorizing && (
-            <View style={s.vecBadge}>
-              <Text style={s.vecBadgeText}>{t("home.vec_indexed", "已索引")}</Text>
             </View>
           )}
 
@@ -411,7 +362,6 @@ export const BookCard = memo(function BookCard({
         }}
         onShowDetails={onShowDetails}
         onManageTags={onManageTags}
-        onVectorize={onVectorize}
         onDelete={onDelete}
       />
     </>

@@ -1,9 +1,8 @@
 /**
- * Settings store — global reading settings, AI config, translation config
+ * Settings store — global reading settings, translation config
  */
-import type { AIConfig, AIEndpoint, ReadSettings } from "@readany/core/types";
+import type { ReadSettings } from "@readany/core/types";
 import type { TranslationConfig, TranslationTargetLang } from "@readany/core/types/translation";
-import { logAIEndpointDebug, summarizeDebugText } from "@readany/core/ai/request-debug";
 import {
   buildProviderModelsUrl,
   providerRequiresApiKey,

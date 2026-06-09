@@ -1,14 +1,12 @@
 import { BookCard } from "@/components/library/BookCard";
 import { GroupCard } from "@/components/library/GroupCard";
 import { GroupPickerSheet } from "@/components/library/GroupPickerSheet";
-import { type ExtractorRef, ExtractorWebView } from "@/components/rag/ExtractorWebView";
 import {
   ArrowDownAZIcon,
   ArrowUpAZIcon,
   CheckCheckIcon,
   ChevronLeftIcon,
   ClockIcon,
-  DatabaseIcon,
   FolderInputIcon,
   FolderMinusIcon,
   HashIcon,
@@ -22,7 +20,6 @@ import {
 import { SyncButton } from "@/components/ui/SyncButton";
 import { useResponsiveLayout } from "@/hooks/use-responsive-layout";
 import { openMobileBook } from "@/lib/library/open-mobile-book";
-import { setCallback, setExtractorRef } from "@/lib/rag/auto-vectorize-service";
 import type { RootStackParamList } from "@/navigation/RootNavigator";
 import { WebDavConnectSheet } from "@/screens/library/WebDavConnectSheet";
 import { WebDavImportSourceSheet } from "@/screens/library/WebDavImportSourceSheet";
@@ -43,7 +40,6 @@ import {
   type WebDavImportSource,
   getPlatformService,
 } from "@readany/core";
-import { setFallbackContentProvider } from "@readany/core/ai";
 import { onLibraryChanged } from "@readany/core/events/library-events";
 import { useSyncStore } from "@readany/core/stores";
 import { SYNC_SECRET_KEYS } from "@readany/core/sync/sync-backend";
@@ -51,7 +47,7 @@ import type { Book, BookGroup, SortField } from "@readany/core/types";
 import * as DocumentPicker from "expo-document-picker";
 /**
  * LibraryScreen — matching Tauri mobile LibraryPage exactly.
- * Features: header search/sort/import, tag filter, vectorization progress banner,
+ * Features: header search/sort/import, tag filter,
  * tag management sheet, book grid (3 cols), empty/loading states.
  */
 import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -76,7 +72,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TagManagementSheet } from "./library/TagManagementSheet";
 import { useBookDownload } from "./library/useBookDownload";
-import { useVectorizationQueue } from "./library/useVectorizationQueue";
 
 const BOOK_PNG = require("../../assets/book.png");
 const BOOK_DARK_PNG = require("../../assets/book-dark.png");
@@ -180,7 +175,6 @@ export function LibraryScreen() {
   const emptyImportAnchorRef = useRef<View>(null);
   const localImportInFlightRef = useRef(false);
 
-  const extractorRef = useRef<ExtractorRef>(null);
   const loadSyncConfig = useSyncStore((state) => state.loadConfig);
   const syncConfig = useSyncStore((state) => state.config);
   const syncBackendType = useSyncStore((state) => state.backendType);
@@ -219,10 +213,6 @@ export function LibraryScreen() {
     onSuccess: () => {},
   });
 
-  const { vectorQueue, vectorizingBookId, vectorProgress, handleVectorize } = useVectorizationQueue(
-    { extractorRef, nav },
-  );
-
   const openSearch = useCallback(() => {
     setShowSearch(true);
     Animated.timing(searchAnim, { toValue: 1, duration: 300, useNativeDriver: false }).start(() => {
@@ -243,56 +233,6 @@ export function LibraryScreen() {
   useEffect(() => {
     void loadSyncConfig();
   }, [loadSyncConfig]);
-
-  useEffect(() => {
-    setExtractorRef(extractorRef.current);
-    setFallbackContentProvider({
-      async getChapters(book) {
-        if (!extractorRef.current) throw new Error("Mobile fallback extractor is not ready");
-        const platform = getPlatformService();
-        const appData = await platform.getAppDataDir();
-        const filePath =
-          book.filePath.startsWith("/") ||
-          book.filePath.startsWith("file://") ||
-          book.filePath.startsWith("asset://") ||
-          book.filePath.startsWith("http")
-            ? book.filePath
-            : await platform.joinPath(appData, book.filePath);
-        const bytes = await platform.readFile(filePath);
-        const chunkSize = 0x8000;
-        let binary = "";
-        for (let i = 0; i < bytes.length; i += chunkSize) {
-          binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
-        }
-        const mimeTypes: Record<string, string> = {
-          epub: "application/epub+zip",
-          pdf: "application/pdf",
-          mobi: "application/x-mobipocket-ebook",
-          azw: "application/vnd.amazon.ebook",
-          azw3: "application/vnd.amazon.ebook",
-          cbz: "application/vnd.comicbook+zip",
-          cbr: "application/vnd.comicbook+zip",
-          fb2: "application/x-fictionbook+xml",
-          fbz: "application/x-zip-compressed-fb2",
-          txt: "text/plain",
-        };
-        return extractorRef.current.extractChapters(
-          btoa(binary),
-          mimeTypes[String(book.format || "").toLowerCase()] || "application/epub+zip",
-        );
-      },
-    });
-    setCallback((bookId, progress) => {
-      console.log(
-        `[AutoVectorize] Book ${bookId}: ${progress.status} (${Math.round(progress.progress * 100)}%)`,
-      );
-    });
-    return () => {
-      setExtractorRef(null);
-      setFallbackContentProvider(null);
-      setCallback(null);
-    };
-  }, []);
 
   useEffect(() => {
     return onLibraryChanged((deletedTags) => loadBooks(deletedTags));
@@ -644,15 +584,6 @@ export function LibraryScreen() {
     setTagSheetOpen(true);
   }, [selectedBookIds, books]);
 
-  const handleBatchVectorize = useCallback(() => {
-    if (selectedBookIds.size === 0) return;
-    const selectedBooks = books.filter((b) => selectedBookIds.has(b.id));
-    for (const book of selectedBooks) {
-      handleVectorize(book);
-    }
-    exitSelectionMode();
-  }, [selectedBookIds, books, handleVectorize, exitSelectionMode]);
-
   const openGroupNameModal = useCallback((mode: "create" | "rename", group?: BookGroup) => {
     setGroupNameInput(group?.name ?? "");
     setGroupNameModal({ mode, group });
@@ -738,10 +669,6 @@ export function LibraryScreen() {
             onDelete={removeBook}
             onShowDetails={handleShowDetails}
             onManageTags={handleManageTags}
-            onVectorize={handleVectorize}
-            isVectorizing={vectorizingBookId === item.book.id}
-            isQueued={vectorQueue.some((b) => b.id === item.book.id)}
-            vectorProgress={vectorizingBookId === item.book.id ? vectorProgress : null}
             downloadProgress={downloadingBookId === item.book.id ? downloadProgress : null}
             isSelectionMode={selectionMode}
             isSelected={selectedBookIds.has(item.book.id)}
@@ -758,16 +685,12 @@ export function LibraryScreen() {
       handleManageTags,
       handleShowDetails,
       handleOpen,
-      handleVectorize,
       removeBook,
       s.gridItem,
       selectedBookIds,
       selectionMode,
       setActiveGroupId,
       toggleBookSelection,
-      vectorProgress,
-      vectorQueue,
-      vectorizingBookId,
       downloadingBookId,
       downloadProgress,
     ],
@@ -775,7 +698,6 @@ export function LibraryScreen() {
 
   return (
     <SafeAreaView style={[s.container, { backgroundColor: colors.background }]} edges={["top"]}>
-      <ExtractorWebView ref={extractorRef} />
 
       {/* Header */}
       <View style={[s.header, { zIndex: 20 }]}>
@@ -811,9 +733,6 @@ export function LibraryScreen() {
                     <FolderMinusIcon size={18} color={colors.mutedForeground} />
                   </TouchableOpacity>
                 ) : null}
-                <TouchableOpacity style={s.headerBtn} onPress={handleBatchVectorize}>
-                  <DatabaseIcon size={18} color={colors.mutedForeground} />
-                </TouchableOpacity>
                 <TouchableOpacity style={s.headerBtn} onPress={handleBatchDelete}>
                   <Trash2Icon size={18} color={colors.destructive} />
                 </TouchableOpacity>
@@ -1067,7 +986,6 @@ export function LibraryScreen() {
             <FlatList
               data={gridItems}
               renderItem={renderGridItem}
-              extraData={{ vectorProgress, vectorizingBookId }}
               keyExtractor={(item) =>
                 item.type === "group" ? `group-${item.group.id}` : item.book.id
               }

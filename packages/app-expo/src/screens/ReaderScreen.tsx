@@ -34,7 +34,6 @@ import { useMissingBookPromptStore } from "@/stores/missing-book-prompt-store";
 import { useTheme } from "@/styles/ThemeContext";
 import { useColors, withOpacity } from "@/styles/theme";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { readingContextService } from "@readany/core/ai/reading-context-service";
 import { runWithDbRetry } from "@readany/core/db/write-retry";
 import { useChapterTranslation } from "@readany/core/hooks";
 import { useReadingSession } from "@readany/core/hooks/use-reading-session";
@@ -755,39 +754,15 @@ export function ReaderScreen({ route, navigation }: Props) {
         void cb();
       }
 
-      // Sync reading context for AI tools
-      readingContextService.updateContext({
-        bookId,
-        bookTitle: book?.meta?.title || "",
-        currentChapter: {
-          index: detail.section?.current ?? 0,
-          title: detail.tocItem?.label || "",
-          href: detail.tocItem?.href || "",
-        },
-        currentPosition: {
-          cfi: detail.cfi || "",
-          percentage: (detail.fraction ?? 0) * 100,
-        },
-      });
     },
     onTocReady: (items: TOCItem[]) => {
       setToc(items);
     },
     onSelection: (detail: SelectionEvent) => {
       setSelection(detail);
-      // Sync selection for AI tools
-      if (detail.cfi) {
-        readingContextService.updateSelection({
-          text: detail.text,
-          cfi: detail.cfi,
-          chapterIndex: 0,
-          chapterTitle: "",
-        });
-      }
     },
     onSelectionCleared: () => {
       setSelection(null);
-      readingContextService.clearSelection();
     },
     onTap: () => {
       if (noteTooltipVisibleRef.current || Date.now() < suppressReaderTapUntilRef.current) {
@@ -1051,7 +1026,6 @@ export function ReaderScreen({ route, navigation }: Props) {
     loadAnnotations(bookId);
 
     return () => {
-      readingContextService.clearContext();
     };
   }, [bookId]);
 
