@@ -13,7 +13,6 @@ import FeedbackScreen from "@/screens/settings/FeedbackScreen";
 import FontSettingsScreen from "@/screens/settings/FontSettingsScreen";
 import SyncSettingsScreen from "@/screens/settings/SyncSettingsScreen";
 import TTSSettingsScreen from "@/screens/settings/TTSSettingsScreen";
-import TranslationSettingsScreen from "@/screens/settings/TranslationSettingsScreen";
 import { useSettingsStore } from "@/stores";
 /**
  * RootNavigator — top-level stack matching Tauri mobile App.tsx routes exactly.
@@ -31,7 +30,6 @@ export type RootStackParamList = {
   Badges: undefined;
   AppearanceSettings: undefined;
   TTSSettings: undefined;
-  TranslationSettings: undefined;
   SyncSettings: undefined;
   About: undefined;
   Feedback: undefined;
@@ -80,7 +78,6 @@ export function RootNavigator() {
             />
             <Stack.Screen name="AppearanceSettings" component={AppearanceSettingsScreen} />
             <Stack.Screen name="TTSSettings" component={TTSSettingsScreen} />
-            <Stack.Screen name="TranslationSettings" component={TranslationSettingsScreen} />
             <Stack.Screen name="SyncSettings" component={SyncSettingsScreen} />
             <Stack.Screen name="About" component={AboutScreen} />
             <Stack.Screen name="Feedback" component={FeedbackScreen} />

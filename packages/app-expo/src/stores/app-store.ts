@@ -24,7 +24,6 @@ export type SettingsTab =
   | "ai"
   | "vectorModel"
   | "tts"
-  | "translation"
   | "sync"
   | "about";
 

@@ -1,14 +1,12 @@
 /**
- * Settings store — global reading settings, translation config
+ * Settings store — global reading settings
  */
 import type { ReadSettings } from "@readany/core/types";
-import type { TranslationConfig, TranslationTargetLang } from "@readany/core/types/translation";
 import { create } from "zustand";
 import { withPersist } from "./persist";
 
 export interface SettingsState {
   readSettings: ReadSettings;
-  translationConfig: TranslationConfig;
   settingsUpdatedAt: number;
   hasCompletedOnboarding: boolean;
   showOnboardingGuide: boolean;
@@ -17,8 +15,6 @@ export interface SettingsState {
   completeOnboarding: () => void;
   setShowOnboardingGuide: (show: boolean) => void;
   updateReadSettings: (updates: Partial<ReadSettings>) => void;
-  updateTranslationConfig: (updates: Partial<TranslationConfig>) => void;
-  setTranslationLang: (lang: TranslationTargetLang) => void;
   resetToDefaults: () => Promise<void>;
 }
 
@@ -36,16 +32,10 @@ const defaultReadSettings: ReadSettings = {
   defaultHighlightColor: "yellow",
 };
 
-const defaultTranslationConfig: TranslationConfig = {
-  provider: { id: "ai", name: "AI 翻译" },
-  targetLang: "zh-CN",
-};
-
 export const useSettingsStore = create<SettingsState>()(
   withPersist("settings", (set, get, api) => {
     return {
       readSettings: defaultReadSettings,
-      translationConfig: defaultTranslationConfig,
       settingsUpdatedAt: 0,
       hasCompletedOnboarding: false,
       showOnboardingGuide: true,
@@ -60,21 +50,9 @@ export const useSettingsStore = create<SettingsState>()(
           settingsUpdatedAt: Date.now(),
         })),
 
-      updateTranslationConfig: (updates) =>
-        set((state) => ({
-          translationConfig: { ...state.translationConfig, ...updates },
-          settingsUpdatedAt: Date.now(),
-        })),
-
-      setTranslationLang: (lang) =>
-        set((state) => ({
-          translationConfig: { ...state.translationConfig, targetLang: lang },
-        })),
-
       resetToDefaults: async () => {
         set({
           readSettings: defaultReadSettings,
-          translationConfig: defaultTranslationConfig,
         });
       },
     };

@@ -9,7 +9,6 @@ import {
   FlameIcon,
   HelpCircleIcon,
   InfoIcon,
-  LanguagesIcon,
   MessageSquareIcon,
   PaletteIcon,
   PuzzleIcon,
@@ -76,7 +75,6 @@ type ProfileMenuRoute = Extract<
   | "FontSettings"
   | "SyncSettings"
   | "TTSSettings"
-  | "TranslationSettings"
   | "Feedback"
   | "About"
 >;
@@ -451,11 +449,6 @@ export function ProfileScreen() {
         title: t("settings.skills", "能力"),
         items: [
           { icon: Volume2Icon, label: t("tts.title", "语音朗读"), route: "TTSSettings" as const },
-          {
-            icon: LanguagesIcon,
-            label: t("settings.translationTab", "翻译"),
-            route: "TranslationSettings" as const,
-          },
         ],
       },
       {
