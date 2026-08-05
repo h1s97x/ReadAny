@@ -5,15 +5,15 @@
 <h1 align="center">ReadAny</h1>
 
 <p align="center">
-  <strong>Local-first AI e-book reader for desktop and mobile</strong>
+  <strong>Local-first e-book reader for desktop and mobile</strong>
 </p>
 
 <p align="center">
-  <em>"Why do I forget what I read? Why are my notes scattered? Why can I only search by keywords?"</em>
+  <em>"A local-first e-book reader with highlights, notes, TTS, and cross-device sync."</em>
 </p>
 
 <p align="center">
-  ReadAny helps you ask questions about books, find ideas by meaning, and build a private reading knowledge base with RAG chat, semantic search, highlights, TTS, and WebDAV sync.
+  ReadAny helps you read, annotate, and manage your e-book library with highlights, notes, TTS, reading statistics, and WebDAV sync.
 </p>
 
 <p align="center">
@@ -36,34 +36,27 @@
 
 > 🚀 **v2.0 Update**: Mobile apps (iOS/Android) now available! See [Mobile](#mobile-apps) section below.
 
-## AI-Native Reading Workflow
-
-- **Chat with your library** - Ask questions about the current book or selected passages, with answers grounded in your reading context
-- **Find ideas semantically** - Hybrid vector retrieval + BM25 search helps you find concepts even when the exact keyword is missing
-- **Keep knowledge private** - Local embeddings and a local vector store keep your books, highlights, and notes offline-capable
-- **Use your preferred model** - Connect OpenAI, Claude, Gemini, Ollama, DeepSeek, or custom-compatible providers
-
 ## Why ReadAny?
 
 | Problem | Traditional Readers | ReadAny |
 |---------|---------------------|---------|
-| Search content | Keywords only | **Semantic search** that understands your intent |
-| Ask questions | Find answers yourself | **AI answers directly + locates sources** |
+| Search content | Keywords only | **Full-text search** across your library |
+| Ask questions | Find answers yourself | **Search & navigate** to relevant passages |
 | Take notes | Manual copy-paste | **Select to highlight**, one-click export |
 | Knowledge management | Scattered notes | **Unified management**, multi-format export |
-| Privacy | Upload to cloud | **Local vector store**, fully offline capable |
+| Privacy | Upload to cloud | **Local-first**, fully offline capable |
 
 ### Comparison with Alternatives
 
 | Feature | ReadAny | Calibre | KOReader | Apple Books |
 |---------|---------|---------|----------|-------------|
-| AI Chat | ✅ | ❌ | ❌ | ❌ |
-| Semantic Search (RAG) | ✅ | ❌ | ❌ | ❌ |
-| Local Vector Store | ✅ | - | - | ❌ |
+
+
+
 | TTS (Text-to-Speech) | ✅ | ❌ | Limited | Limited |
 | Reading Stats | ✅ | ❌ | ❌ | Limited |
 | WebDAV Sync | ✅ | ❌ | ❌ | ❌ |
-| Skills System | ✅ | ❌ | ❌ | ❌ |
+
 | Format Support | 10+ | 15+ | 10+ | 2 |
 | Note Export | 5 formats | Limited | Limited | Limited |
 | Open Source | ✅ | ✅ | ✅ | ❌ |
@@ -76,13 +69,6 @@
 
 <div align="center">
   <img src="assets/hero-screenshot.png" width="80%" alt="ReadAny Hero">
-</div>
-
-### AI-Powered Chat
-
-<div align="center">
-  <img src="assets/ai-chat-desktop.png" width="60%" alt="AI Chat - Desktop">
-  <img src="assets/ai-chat-mobile.png" width="20%" alt="AI Chat - Mobile">
 </div>
 
 ### Notes & Highlights
@@ -116,14 +102,6 @@
 ---
 
 ## Core Features
-
-### 🤖 AI-Powered Reading
-
-- **Intelligent Chat** - Ask questions about your books, AI knows your position, selected text, and highlights
-- **Semantic Search** - Beyond keywords, vector retrieval + BM25 hybrid search
-- **Instant Translation** - AI translation or DeepL, 19 languages supported
-- **Multiple AI Providers** - OpenAI, Claude, Gemini, Ollama, DeepSeek
-- **Skills System** - Built-in skills (summarizer, concept explainer, character tracker, etc.) + create custom skills
 
 ### 📝 Annotation & Knowledge Management
 
@@ -191,7 +169,7 @@ brew install --cask readany
 
 1. **Import Books** - Drag and drop files into library
 2. **Start Reading** - Double-click to open, immersive experience
-3. **Configure AI** (Optional) - Settings → AI → Enter API Key
+3. **Start Reading** - Double-click to open, immersive experience
 
 ### Mobile Apps
 
@@ -230,17 +208,6 @@ Android emulator first, then run `pnpm expo:android`.
 
 Mobile app source lives in [`packages/app-expo`](packages/app-expo).
 
-### AI Configuration
-
-| Provider | Get API Key |
-|----------|-------------|
-| OpenAI | [platform.openai.com](https://platform.openai.com/) |
-| Anthropic Claude | [console.anthropic.com](https://console.anthropic.com/) |
-| Google Gemini | [aistudio.google.com](https://aistudio.google.com/) |
-| Ollama / DeepSeek | Local or custom endpoint |
-
----
-
 ## Tech Stack
 
 | Layer | Technology |
@@ -253,8 +220,8 @@ Mobile app source lives in [`packages/app-expo`](packages/app-expo).
 | State | [Zustand](https://zustand.docs.pmnd.rs/) |
 | Database | SQLite |
 | E-Book | [foliate-js](https://github.com/johnfactotum/foliate-js) |
-| AI/LLM | [LangChain.js](https://js.langchain.com/) + [LangGraph](https://langchain-ai.github.io/langgraphjs/) |
-| Embeddings | [Transformers.js](https://huggingface.co/docs/transformers.js) |
+
+
 
 ---
 
@@ -299,9 +266,7 @@ Android Studio/SDK for Android mobile development.
 - [x] **Mobile apps** — iOS and Android versions available
 - [x] **TTS (Text-to-Speech)** — Edge TTS, multiple voices
 - [x] **Reading Statistics** — Heatmap, trends, streaks
-- [x] **Skills System** — Built-in + custom AI skills
 - [x] **WebDAV Sync** — Cross-device synchronization
-- [ ] More AI models (Qwen, GLM, Llama)
 - [ ] PDF reflow/re-render
 - [ ] Plugin system
 - [ ] Cloud sync (official service)
@@ -333,7 +298,6 @@ This project is open source under the GNU General Public License v3.0. You are f
 - [foliate-js](https://github.com/johnfactotum/foliate-js) - E-book rendering engine
 - [Tauri](https://tauri.app/) - Cross-platform desktop framework
 - [Expo](https://expo.dev/) - React Native development platform
-- [LangChain.js](https://js.langchain.com/) - AI orchestration framework
 - [Radix UI](https://www.radix-ui.com/) - Accessible UI components
 - [Lucide](https://lucide.dev/) - Icon library
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseJSON, serializeEmbedding, deserializeEmbedding } from "../db-core";
+import { parseJSON } from "../db-core";
 
 describe("parseJSON", () => {
   it("parses valid JSON string", () => {
@@ -28,56 +28,3 @@ describe("parseJSON", () => {
   });
 });
 
-describe("serializeEmbedding / deserializeEmbedding", () => {
-  it("round-trips a float32 array", () => {
-    const original = [0.1, 0.2, 0.3, -0.5, 1.0];
-    const serialized = serializeEmbedding(original);
-    expect(serialized).toBeInstanceOf(Uint8Array);
-    expect(serialized!.byteLength).toBe(original.length * 4);
-
-    const deserialized = deserializeEmbedding(serialized);
-    expect(deserialized).toBeDefined();
-    expect(deserialized!.length).toBe(original.length);
-    for (let i = 0; i < original.length; i++) {
-      expect(deserialized![i]).toBeCloseTo(original[i], 5);
-    }
-  });
-
-  it("returns null for undefined embedding", () => {
-    expect(serializeEmbedding(undefined)).toBeNull();
-  });
-
-  it("returns null for empty embedding", () => {
-    expect(serializeEmbedding([])).toBeNull();
-  });
-
-  it("returns undefined for null data", () => {
-    expect(deserializeEmbedding(null)).toBeUndefined();
-  });
-
-  it("returns undefined for undefined data", () => {
-    expect(deserializeEmbedding(undefined)).toBeUndefined();
-  });
-
-  it("returns undefined for empty Uint8Array", () => {
-    expect(deserializeEmbedding(new Uint8Array(0))).toBeUndefined();
-  });
-
-  it("handles single-element embedding", () => {
-    const original = [3.14];
-    const serialized = serializeEmbedding(original);
-    const deserialized = deserializeEmbedding(serialized);
-    expect(deserialized!.length).toBe(1);
-    expect(deserialized![0]).toBeCloseTo(3.14, 5);
-  });
-
-  it("handles large embedding", () => {
-    const original = Array.from({ length: 384 }, (_, i) => Math.sin(i * 0.01));
-    const serialized = serializeEmbedding(original);
-    const deserialized = deserializeEmbedding(serialized);
-    expect(deserialized!.length).toBe(384);
-    for (let i = 0; i < 10; i++) {
-      expect(deserialized![i]).toBeCloseTo(original[i], 5);
-    }
-  });
-});

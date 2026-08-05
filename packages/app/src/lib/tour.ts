@@ -39,24 +39,12 @@ export function startTour() {
         },
       },
       {
-        element: "#tour-vectorize",
-        popover: {
-          title: i18n.t("tour.vectorize.title", "Smart Vectorization"),
-          description: i18n.t(
-            "tour.vectorize.desc",
-            "Build a semantic index for powerful AI search and chat.",
-          ),
-          side: "right",
-          align: "start",
-        },
-      },
-      {
         element: "#tour-settings",
         popover: {
           title: i18n.t("tour.settings.title", "Settings"),
           description: i18n.t(
             "tour.settings.desc",
-            "Configure AI provider, translation engine, sync and more.",
+            "Configure fonts, reading preferences, sync and more.",
           ),
           side: "right",
           align: "start",

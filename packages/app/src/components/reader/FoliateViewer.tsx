@@ -3,15 +3,10 @@ import { useFoliateEvents } from "@/hooks/reader/useFoliateEvents";
 import type { FoliateView } from "@/hooks/reader/useFoliateView";
 import { wrappedFoliateView } from "@/hooks/reader/useFoliateView";
 import { usePagination } from "@/hooks/reader/usePagination";
-import { readingContextService } from "@/lib/ai/reading-context-service";
 import type { BookDoc, BookFormat } from "@/lib/reader/document-loader";
 import { getDirection, isFixedLayoutBook } from "@/lib/reader/document-loader";
 import { getFontTheme } from "@/lib/reader/font-themes";
 import { registerIframeEventHandlers } from "@/lib/reader/iframe-event-handlers";
-import type {
-  ChapterParagraph,
-  ChapterTranslationResult,
-} from "@readany/core/translation/chapter-translator";
 import { cleanText, isTTSFootnoteMarker, shouldSkipTTSNode } from "@readany/core/tts";
 import type { ViewSettings } from "@readany/core/types";
 import { Overlayer } from "foliate-js/overlayer.js";
@@ -631,20 +626,6 @@ export interface FoliateViewerHandle {
     after?: number,
   ) => Promise<{ before: TTSSegmentDetail[]; after: TTSSegmentDetail[] }>;
   setTTSHighlight: (cfi: string | null, color?: string) => Promise<void>;
-  /** Extract all paragraphs from current section for chapter translation */
-  getChapterParagraphs: () => ChapterParagraph[];
-  /** Inject translated paragraphs below each original paragraph */
-  injectChapterTranslations: (
-    results: ChapterTranslationResult[],
-    visibility?: { originalVisible: boolean; translationVisible: boolean },
-  ) => Promise<void>;
-  /** Remove all injected chapter translation elements */
-  removeChapterTranslations: () => void;
-  /** Apply visibility settings to original and translation elements */
-  applyChapterTranslationVisibility: (
-    originalVisible: boolean,
-    translationVisible: boolean,
-  ) => void;
   /** Inject ruby (pinyin/furigana) annotations into current document */
   injectRuby: (mode: "zh-pinyin" | "zh-zhuyin" | "ja") => Promise<void>;
   /** Remove all ruby annotations from current document */
@@ -1590,162 +1571,6 @@ export const FoliateViewer = forwardRef<FoliateViewerHandle, FoliateViewerProps>
             // no-op
           }
         },
-        getChapterParagraphs: () => {
-          try {
-            const renderer = viewRef.current?.renderer;
-            const contents = renderer?.getContents?.();
-            if (!contents?.[0]?.doc) return [];
-            const doc = contents[0].doc as Document;
-
-            const blockSelector =
-              "p, h1, h2, h3, h4, h5, h6, li, blockquote, dd, dt, figcaption, pre, td, th";
-            const blocks = doc.querySelectorAll(blockSelector);
-            const paragraphs: ChapterParagraph[] = [];
-
-            blocks.forEach((el, i) => {
-              const text = (el as HTMLElement).innerText?.trim() || el.textContent?.trim() || "";
-              if (text.length < 2) return;
-              const id = `para_${i}`;
-              (el as HTMLElement).setAttribute("data-translate-id", id);
-              paragraphs.push({
-                id,
-                text,
-                tagName: el.tagName.toLowerCase(),
-              });
-            });
-
-            return paragraphs;
-          } catch {
-            return [];
-          }
-        },
-        injectChapterTranslations: async (
-          results: ChapterTranslationResult[],
-          visibility = { originalVisible: true, translationVisible: true },
-        ) => {
-          try {
-            const view = viewRef.current;
-            const renderer = view?.renderer;
-            const contents = renderer?.getContents?.();
-            if (!contents?.[0]?.doc) return;
-            const doc = contents[0].doc as Document;
-
-            // Inject translation CSS once
-            if (!doc.getElementById("readany-chapter-translation-style")) {
-              const style = doc.createElement("style");
-              style.id = "readany-chapter-translation-style";
-              style.textContent = `
-                .readany-translation {
-                  color: #6b7280;
-                  font-size: 0.9em;
-                  line-height: 1.5;
-                  margin-top: 4px;
-                  margin-bottom: 8px;
-                  padding-left: 8px;
-                  border-left: 2px solid #d1d5db;
-                  opacity: 0.85;
-                }
-                .readany-translation[data-hidden="true"] { display: none; }
-                .readany-translation[data-solo="true"] {
-                  color: inherit;
-                  font-size: inherit;
-                  line-height: inherit;
-                  margin-top: 0;
-                  margin-bottom: 0.8em;
-                  padding-left: 0;
-                  border-left: none;
-                  opacity: 1;
-                }
-                [data-translate-id][data-original-hidden="true"] { display: none; }
-                @media (prefers-color-scheme: dark) {
-                  .readany-translation { color: #9ca3af; border-left-color: #4b5563; }
-                }
-              `;
-              doc.head.appendChild(style);
-            }
-
-            for (const result of results) {
-              if (!result.translatedText) continue;
-              const el = doc.querySelector(
-                `[data-translate-id="${result.paragraphId}"]`,
-              ) as HTMLElement | null;
-              if (!el) continue;
-              el.setAttribute("data-original-hidden", String(!visibility.originalVisible));
-              // Skip if already injected
-              if (el.nextElementSibling?.classList?.contains("readany-translation")) {
-                const existing = el.nextElementSibling as HTMLElement;
-                existing.setAttribute("data-hidden", String(!visibility.translationVisible));
-                existing.setAttribute(
-                  "data-solo",
-                  String(!visibility.originalVisible && visibility.translationVisible),
-                );
-                continue;
-              }
-
-              const div = doc.createElement("div");
-              div.className = "readany-translation";
-              div.setAttribute("data-para-id", result.paragraphId);
-              div.setAttribute("data-hidden", String(!visibility.translationVisible));
-              div.setAttribute(
-                "data-solo",
-                String(!visibility.originalVisible && visibility.translationVisible),
-              );
-              div.textContent = result.translatedText;
-              el.parentNode?.insertBefore(div, el.nextSibling);
-            }
-
-            await waitForReaderLayoutStable(view);
-          } catch (err) {
-            console.error("[injectChapterTranslations] Error:", err);
-          }
-        },
-        removeChapterTranslations: () => {
-          try {
-            const renderer = viewRef.current?.renderer;
-            const contents = renderer?.getContents?.();
-            if (!contents?.[0]?.doc) return;
-            const doc = contents[0].doc as Document;
-
-            const elements = doc.querySelectorAll(".readany-translation");
-            elements.forEach((el) => el.remove());
-
-            const style = doc.getElementById("readany-chapter-translation-style");
-            style?.remove();
-          } catch (err) {
-            console.error("[removeChapterTranslations] Error:", err);
-          }
-        },
-        applyChapterTranslationVisibility: (
-          originalVisible: boolean,
-          translationVisible: boolean,
-        ) => {
-          try {
-            const renderer = viewRef.current?.renderer;
-            const contents = renderer?.getContents?.();
-            if (!contents?.[0]?.doc) return;
-            const doc = contents[0].doc as Document;
-
-            // Update original paragraphs visibility
-            const originalParagraphs = doc.querySelectorAll("[data-translate-id]");
-            originalParagraphs.forEach((el) => {
-              (el as HTMLElement).setAttribute("data-original-hidden", String(!originalVisible));
-            });
-
-            // Update translation visibility
-            const translations = doc.querySelectorAll(".readany-translation");
-            translations.forEach((el) => {
-              const translationEl = el as HTMLElement;
-              translationEl.setAttribute("data-hidden", String(!translationVisible));
-              // If only translation is visible (no original), apply solo style
-              translationEl.setAttribute(
-                "data-solo",
-                String(!originalVisible && translationVisible),
-              );
-            });
-          } catch (err) {
-            console.error("[applyChapterTranslationVisibility] Error:", err);
-          }
-        },
         injectRuby: async (mode: "zh-pinyin" | "zh-zhuyin" | "ja") => {
           try {
             const renderer = viewRef.current?.renderer;
@@ -1910,92 +1735,6 @@ export const FoliateViewer = forwardRef<FoliateViewerHandle, FoliateViewerProps>
         setFootnotePreview(null);
         onRelocate?.(detail);
 
-        // Update reading context service
-        if (detail.tocItem?.label && detail.fraction !== undefined) {
-          // Extract visible text from the current page using precise viewport detection
-          let surroundingText = "";
-          try {
-            const renderer = viewRef.current?.renderer;
-            const contents = renderer?.getContents?.();
-            if (contents?.[0]?.doc) {
-              const doc = contents[0].doc as Document;
-              const isPaginated = !renderer.scrolled;
-              const pSize = renderer.size;
-              const pStart = renderer.start;
-
-              if (isPaginated && pSize > 0) {
-                const visibleLeft = pStart - pSize;
-                const visibleRight = pStart;
-                const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
-                  acceptNode: acceptTTSNode,
-                });
-                const visibleTexts: string[] = [];
-                let textNode = walker.nextNode();
-                while (textNode) {
-                  const range = doc.createRange();
-                  range.selectNodeContents(textNode);
-                  const rect = range.getBoundingClientRect();
-                  if (rect.right > visibleLeft && rect.left < visibleRight && rect.width > 0) {
-                    const text = normalizeTTSSegmentText(textNode.nodeValue);
-                    if (text) visibleTexts.push(text);
-                  }
-                  textNode = walker.nextNode();
-                }
-                surroundingText = visibleTexts.join(" ").trim().slice(0, 2000);
-              } else {
-                const win = doc.defaultView;
-                if (win) {
-                  const vw = win.innerWidth;
-                  const vh = win.innerHeight;
-                  const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
-                    acceptNode: acceptTTSNode,
-                  });
-                  const visibleTexts: string[] = [];
-                  let textNode = walker.nextNode();
-                  while (textNode) {
-                    const range = doc.createRange();
-                    range.selectNodeContents(textNode);
-                    const rect = range.getBoundingClientRect();
-                    if (
-                      rect.right > 0 &&
-                      rect.left < vw &&
-                      rect.bottom > 0 &&
-                      rect.top < vh &&
-                      rect.width > 0
-                    ) {
-                      const text = normalizeTTSSegmentText(textNode.nodeValue);
-                      if (text) visibleTexts.push(text);
-                    }
-                    textNode = walker.nextNode();
-                  }
-                  surroundingText = visibleTexts.join(" ").trim().slice(0, 2000);
-                }
-              }
-
-              // Fallback: if no visible text detected, use section text
-              if (!surroundingText) {
-                const rawText = doc.body?.textContent || "";
-                surroundingText = normalizeTTSSegmentText(rawText).slice(0, 2000);
-              }
-            }
-          } catch {
-            // Ignore extraction errors
-          }
-
-          readingContextService.updateContext({
-            bookId: bookKey,
-            currentChapter: {
-              index: detail.section?.current ?? 0,
-              title: detail.tocItem.label,
-              href: detail.tocItem.href || "",
-            },
-            currentPosition: {
-              cfi: detail.cfi || "",
-              percentage: detail.fraction * 100,
-            },
-            surroundingText,
-          });
-        }
       },
       [onRelocate, bookKey],
     );
@@ -2566,16 +2305,6 @@ export const FoliateViewer = forwardRef<FoliateViewerHandle, FoliateViewerProps>
                 (r) => new DOMRect(r.x + containerRect.x, r.y + containerRect.y, r.width, r.height),
               )
             : rects;
-        }
-
-        // Update reading context service with selection
-        if (cfi && chapterIndex !== undefined) {
-          readingContextService.updateSelection({
-            text,
-            cfi,
-            chapterIndex,
-            chapterTitle: "", // Will be filled by relocate handler
-          });
         }
 
         return { text, cfi, chapterIndex, rects: offsetRects, range };

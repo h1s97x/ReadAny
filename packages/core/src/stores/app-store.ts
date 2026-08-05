@@ -3,7 +3,7 @@
  */
 import { create } from "zustand";
 
-export type TabType = "home" | "reader" | "chat" | "notes" | "skills" | "epubDraft";
+export type TabType = "home" | "reader" | "notes" | "epubDraft";
 
 export interface Tab {
   id: string;
@@ -11,24 +11,19 @@ export interface Tab {
   title: string;
   bookId?: string; // for reader tabs
   draftId?: string; // for EPUB draft workspace tabs
-  threadId?: string; // for chat tabs
   initialCfi?: string; // for reader tabs - initial location to navigate to
   isModified?: boolean;
   lastActiveAt?: number; // timestamp of last activation (for idle tab reclaim)
 }
 
-export type SidebarTab = "chat" | "notes" | "toc" | "highlights" | "stats";
+export type SidebarTab = "notes" | "toc" | "highlights" | "stats";
 
 export type SettingsTab =
   | "general"
   | "reading"
   | "fonts"
-  | "ai"
-  | "vectorModel"
   | "tts"
-  | "translation"
   | "sync"
-  | "externalAi"
   | "feedback"
   | "about";
 
@@ -54,7 +49,7 @@ export const useAppStore = create<AppState>((set) => ({
   tabs: [{ id: "home", type: "home", title: "Home" }],
   activeTabId: "home",
   sidebarOpen: false,
-  sidebarTab: "chat",
+  sidebarTab: "notes",
   showSettings: false,
   settingsTab: "general",
 

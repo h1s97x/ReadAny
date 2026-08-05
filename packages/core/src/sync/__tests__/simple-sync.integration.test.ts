@@ -76,18 +76,6 @@ const TABLE_COLUMNS: Record<string, string[]> = {
     "updated_at",
   ],
   bookmarks: ["id", "book_id", "cfi", "label", "chapter_title", "created_at", "updated_at"],
-  threads: [
-    "id",
-    "book_id",
-    "title",
-    "memory_summary",
-    "memory_updated_at",
-    "memory_message_count",
-    "created_at",
-    "updated_at",
-  ],
-  messages: ["id", "thread_id", "role", "content", "created_at"],
-  skills: ["id", "name", "description", "created_at", "updated_at"],
   tags: ["id", "name", "updated_at"],
   book_tags: ["id", "book_id", "tag_id", "updated_at"],
   reading_sessions: [
@@ -287,14 +275,6 @@ class FakeSyncDb {
       ["highlights", "notes", "bookmarks", "book_tags", "reading_sessions"].includes(table) &&
       row.book_id &&
       !this.tables.get("books")?.has(String(row.book_id))
-    ) {
-      throw new Error("FOREIGN KEY constraint failed");
-    }
-
-    if (
-      table === "messages" &&
-      row.thread_id &&
-      !this.tables.get("threads")?.has(String(row.thread_id))
     ) {
       throw new Error("FOREIGN KEY constraint failed");
     }

@@ -1,7 +1,6 @@
 import {
   CopyIcon,
   HighlighterIcon,
-  LanguagesIcon,
   NotebookPenIcon,
   SparklesIcon,
   Trash2Icon,
@@ -17,7 +16,7 @@ import type { HighlightColor } from "@readany/core/types";
 import * as Clipboard from "expo-clipboard";
 /**
  * SelectionPopover — floating action bar shown when text is selected in the reader.
- * Provides highlight (5 colors), note, copy, translate, AI chat, TTS, and delete actions.
+ * Provides highlight (5 colors), note, copy, TTS, and delete actions.
  * Matches app-mobile styling with icon buttons and expandable color picker.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -57,7 +56,6 @@ interface Props {
   onAIChat: () => void;
   onSpeak?: (text: string, cfi: string) => void;
   onNote?: (text: string, cfi: string) => void;
-  onTranslate?: (text: string) => void;
   onRemoveHighlight?: () => void;
   existingHighlight?: { id: string; color: HighlightColor; note?: string } | null;
   defaultColor?: HighlightColor;
@@ -71,7 +69,6 @@ export function SelectionPopover({
   onAIChat,
   onSpeak,
   onNote,
-  onTranslate,
   onRemoveHighlight,
   existingHighlight,
   defaultColor = "yellow",
@@ -102,7 +99,6 @@ export function SelectionPopover({
   const buttonCount =
     4 +
     (onNote ? 1 : 0) +
-    (onTranslate ? 1 : 0) +
     (onSpeak ? 1 : 0);
   const colorRowItemCount = HIGHLIGHT_COLORS.length + (canRemoveHighlight ? 2 : 0);
   const colorRowWidth = showColors
@@ -176,12 +172,6 @@ export function SelectionPopover({
     onDismiss();
   }, [noteContent, selection.cfi, onNote, onDismiss]);
 
-  const handleTranslate = useCallback(() => {
-    if (onTranslate) {
-      onTranslate(selection.text);
-    }
-    onDismiss();
-  }, [selection.text, onTranslate, onDismiss]);
 
   const handleRemove = useCallback(() => {
     if (onRemoveHighlight) {
@@ -255,10 +245,6 @@ export function SelectionPopover({
             <CopyIcon size={18} color={colors.foreground} />
           </TouchableOpacity>
 
-          {onTranslate && (
-            <TouchableOpacity style={s.iconBtn} onPress={handleTranslate}>
-              <LanguagesIcon size={18} color={colors.foreground} />
-            </TouchableOpacity>
           )}
 
           <TouchableOpacity style={s.iconBtn} onPress={onAIChat}>

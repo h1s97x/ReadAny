@@ -18,8 +18,6 @@ export {
   insertTombstone,
   // Shared utilities
   parseJSON,
-  serializeEmbedding,
-  deserializeEmbedding,
   // Book queries
   getBooks,
   getBook,
@@ -51,34 +49,12 @@ export {
   getBookmarks,
   insertBookmark,
   deleteBookmark,
-  // Thread queries
-  getThreads,
-  getThread,
-  insertThread,
-  updateThreadTitle,
-  updateThreadMemory,
-  deleteThread,
-  deleteThreadsByBookId,
-  // Message queries
-  getMessages,
-  insertMessage,
   // Reading session queries
   getAllReadingSessions,
   getReadingSessions,
   getReadingSessionsByDateRange,
   insertReadingSession,
   updateReadingSession,
-  // Chunk queries
-  getChunks,
-  insertChunks,
-  deleteChunks,
-  clearVectorizationFlagsWithoutLocalChunks,
-  // Skill queries
-  getSkills,
-  insertSkill,
-  upsertSkill,
-  updateSkill,
-  deleteSkill,
 } from "./database";
 
 export type { HighlightWithBook } from "./database";

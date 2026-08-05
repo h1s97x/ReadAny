@@ -6,9 +6,7 @@ import {
   Copy,
   Headphones,
   Highlighter,
-  Languages,
   NotebookPen,
-  Sparkles,
   Trash2,
 } from "lucide-react";
 /**
@@ -28,8 +26,6 @@ interface SelectionPopoverProps {
   onRemoveHighlight: () => void;
   onNote: () => void;
   onCopy: () => void;
-  onTranslate: () => void;
-  onAskAI: () => void;
   onSpeak: () => void;
   onClose: () => void;
 }
@@ -47,8 +43,6 @@ export function SelectionPopover({
   onRemoveHighlight,
   onNote,
   onCopy,
-  onTranslate,
-  onAskAI,
   onSpeak,
   onClose,
 }: SelectionPopoverProps) {
@@ -90,8 +84,6 @@ export function SelectionPopover({
     },
     { icon: NotebookPen, label: t("reader.note"), onClick: onNote, disabled: isPdf },
     { icon: Copy, label: t("common.copy"), onClick: onCopy },
-    { icon: Languages, label: t("reader.translate"), onClick: onTranslate },
-    { icon: Sparkles, label: t("reader.askAI"), onClick: onAskAI },
     { icon: Headphones, label: t("tts.speakSelection"), onClick: onSpeak },
     ...(annotated
       ? [

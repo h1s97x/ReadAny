@@ -7,7 +7,7 @@ describe("app-store tab initial location", () => {
       tabs: [{ id: "home", type: "home", title: "Home" }],
       activeTabId: "home",
       sidebarOpen: false,
-      sidebarTab: "chat",
+      sidebarTab: "notes",
       showSettings: false,
       settingsTab: "general",
     });

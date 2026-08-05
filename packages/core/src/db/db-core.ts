@@ -746,119 +746,14 @@ export async function initLocalDatabase(): Promise<void> {
     await runSerializedDbTask(async () => {
       if (localDbInitialized) return;
 
-      const database = await getLocalDB();
-
-      await database.execute(`
-    CREATE TABLE IF NOT EXISTS chunks (
-      id TEXT PRIMARY KEY,
-      book_id TEXT NOT NULL,
-      chapter_index INTEGER NOT NULL,
-      chapter_title TEXT NOT NULL DEFAULT '',
-      content TEXT NOT NULL,
-      token_count INTEGER NOT NULL DEFAULT 0,
-      start_cfi TEXT,
-      end_cfi TEXT,
-      segment_cfis TEXT,
-      embedding BLOB,
-      updated_at INTEGER NOT NULL DEFAULT 0
-    )
-  `);
-
-      try {
-        await database.execute(
-          "ALTER TABLE chunks ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0",
-        );
-      } catch {
-        // Column already exists on upgraded installs.
-      }
-
-      // Create indexes
-      await database.execute("CREATE INDEX IF NOT EXISTS idx_chunks_book ON chunks(book_id)");
 
       localDbInitialized = true;
-
-      // Migrate data from main DB to local DB on first run
-      await migrateDataToLocalDB();
     });
   })().finally(() => {
     localDbInitPromise = null;
   });
 
   return localDbInitPromise;
-}
-
-/** Migrate chunks from main DB to local DB (one-time) */
-async function migrateDataToLocalDB(): Promise<void> {
-  const platform = getPlatformService();
-  if (!platform.isDesktop) {
-    return;
-  }
-
-  const mainDB = await getDB();
-
-  // Check if migration has already been done
-  try {
-    const rows = await mainDB.select<{ value: string }>(
-      "SELECT value FROM sync_metadata WHERE key = 'local_db_migration_done'",
-    );
-    if (rows.length > 0 && rows[0].value === "1") {
-      return; // Already migrated
-    }
-  } catch {
-    // sync_metadata might not exist yet, skip migration
-    return;
-  }
-
-  // Check if chunks table exists in main DB
-  let hasChunksInMain = false;
-
-  try {
-    await mainDB.select<{ id: string }>("SELECT id FROM chunks LIMIT 1");
-    hasChunksInMain = true;
-  } catch {
-    // Table doesn't exist in main DB
-  }
-
-  const localDB = await getLocalDB();
-
-  // Migrate chunks
-  if (hasChunksInMain) {
-    try {
-      const chunks = await mainDB.select<Record<string, unknown>>(
-        "SELECT id, book_id, chapter_index, chapter_title, content, token_count, start_cfi, end_cfi, segment_cfis, embedding FROM chunks",
-      );
-      for (const chunk of chunks) {
-        await localDB.execute(
-          "INSERT OR IGNORE INTO chunks (id, book_id, chapter_index, chapter_title, content, token_count, start_cfi, end_cfi, segment_cfis, embedding) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-          [
-            chunk.id,
-            chunk.book_id,
-            chunk.chapter_index,
-            chunk.chapter_title,
-            chunk.content,
-            chunk.token_count,
-            chunk.start_cfi,
-            chunk.end_cfi,
-            chunk.segment_cfis,
-            chunk.embedding,
-          ],
-        );
-      }
-      // Drop from main DB
-      await mainDB.execute("DROP TABLE IF EXISTS chunks");
-    } catch {
-      // Migration error — non-fatal, table may be partially migrated
-    }
-  }
-
-  // Mark migration as done
-  try {
-    await mainDB.execute(
-      "INSERT OR REPLACE INTO sync_metadata (key, value) VALUES ('local_db_migration_done', '1')",
-    );
-  } catch {
-    // Non-fatal
-  }
 }
 
 /** Shared JSON parser */
@@ -869,25 +764,4 @@ export function parseJSON<T>(str: string | null | undefined, fallback: T): T {
   } catch {
     return fallback;
   }
-}
-
-/** Serialize float32 embedding array to bytes */
-export function serializeEmbedding(embedding?: number[]): Uint8Array | null {
-  if (!embedding || embedding.length === 0) return null;
-  const buffer = new ArrayBuffer(embedding.length * 4);
-  const view = new Float32Array(buffer);
-  for (let i = 0; i < embedding.length; i++) {
-    view[i] = embedding[i];
-  }
-  return new Uint8Array(buffer);
-}
-
-/** Deserialize bytes back to float32 embedding array */
-export function deserializeEmbedding(data: unknown): number[] | undefined {
-  if (!data) return undefined;
-  // Data comes as an array of bytes from the SQL plugin
-  const bytes = data instanceof Uint8Array ? data : new Uint8Array(data as ArrayBuffer);
-  if (bytes.length === 0) return undefined;
-  const view = new Float32Array(bytes.buffer, bytes.byteOffset, bytes.byteLength / 4);
-  return Array.from(view);
 }

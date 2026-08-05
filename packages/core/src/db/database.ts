@@ -28,8 +28,6 @@ export {
   nextUpdatedAt,
   insertTombstone,
   parseJSON,
-  serializeEmbedding,
-  deserializeEmbedding,
 } from "./db-core";
 
 // --- Domain queries ---
@@ -77,39 +75,9 @@ export {
 } from "./bookmark-queries";
 
 export {
-  getThreads,
-  getThread,
-  insertThread,
-  updateThreadTitle,
-  updateThreadMemory,
-  deleteThread,
-  deleteThreadsByBookId,
-} from "./thread-queries";
-
-export {
-  getMessages,
-  insertMessage,
-} from "./message-queries";
-
-export {
   getAllReadingSessions,
   getReadingSessions,
   getReadingSessionsByDateRange,
   insertReadingSession,
   updateReadingSession,
 } from "./session-queries";
-
-export {
-  getChunks,
-  insertChunks,
-  deleteChunks,
-  clearVectorizationFlagsWithoutLocalChunks,
-} from "./chunk-queries";
-
-export {
-  getSkills,
-  insertSkill,
-  upsertSkill,
-  updateSkill,
-  deleteSkill,
-} from "./skill-queries";

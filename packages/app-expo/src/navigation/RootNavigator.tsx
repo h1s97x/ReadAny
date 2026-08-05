@@ -1,14 +1,11 @@
 import { OnboardingNavigator } from "@/components/onboarding/OnboardingNavigator";
 import { MissingBookPrompt } from "@/components/shared/MissingBookPrompt";
 import BadgesScreen from "@/screens/BadgesScreen";
-import { BookChatScreen } from "@/screens/BookChatScreen";
 import { BookDetailsScreen } from "@/screens/BookDetailsScreen";
 import { FullScreenNotesScreen } from "@/screens/FullScreenNotesScreen";
 import { ReaderScreen } from "@/screens/ReaderScreen";
-import SkillsScreen from "@/screens/SkillsScreen";
 import StatsScreen from "@/screens/StatsScreen";
 import { WebDavImportBrowserScreen } from "@/screens/library/WebDavImportBrowserScreen";
-import AISettingsScreen from "@/screens/settings/AISettingsScreen";
 import AboutScreen from "@/screens/settings/AboutScreen";
 import AppearanceSettingsScreen from "@/screens/settings/AppearanceSettingsScreen";
 import FeedbackDetailScreen from "@/screens/settings/FeedbackDetailScreen";
@@ -16,8 +13,6 @@ import FeedbackScreen from "@/screens/settings/FeedbackScreen";
 import FontSettingsScreen from "@/screens/settings/FontSettingsScreen";
 import SyncSettingsScreen from "@/screens/settings/SyncSettingsScreen";
 import TTSSettingsScreen from "@/screens/settings/TTSSettingsScreen";
-import TranslationSettingsScreen from "@/screens/settings/TranslationSettingsScreen";
-import VectorModelSettingsScreen from "@/screens/settings/VectorModelSettingsScreen";
 import { useSettingsStore } from "@/stores";
 /**
  * RootNavigator — top-level stack matching Tauri mobile App.tsx routes exactly.
@@ -31,15 +26,10 @@ export type RootStackParamList = {
   Tabs: undefined;
   Reader: { bookId: string; cfi?: string; highlight?: boolean; openTTS?: boolean };
   BookDetails: { bookId: string };
-  BookChat: { bookId: string; selectedText?: string; chapterTitle?: string };
   Stats: undefined;
   Badges: undefined;
-  Skills: undefined;
-  VectorModelSettings: undefined;
   AppearanceSettings: undefined;
-  AISettings: undefined;
   TTSSettings: undefined;
-  TranslationSettings: undefined;
   SyncSettings: undefined;
   About: undefined;
   Feedback: undefined;
@@ -77,11 +67,6 @@ export function RootNavigator() {
               options={{ animation: "slide_from_right" }}
             />
             <Stack.Screen
-              name="BookChat"
-              component={BookChatScreen}
-              options={{ animation: "slide_from_right" }}
-            />
-            <Stack.Screen
               name="Stats"
               component={StatsScreen}
               options={{ animation: "slide_from_right" }}
@@ -91,20 +76,8 @@ export function RootNavigator() {
               component={BadgesScreen}
               options={{ animation: "slide_from_right" }}
             />
-            <Stack.Screen
-              name="Skills"
-              component={SkillsScreen}
-              options={{ animation: "slide_from_right" }}
-            />
-            <Stack.Screen
-              name="VectorModelSettings"
-              component={VectorModelSettingsScreen}
-              options={{ animation: "slide_from_right" }}
-            />
             <Stack.Screen name="AppearanceSettings" component={AppearanceSettingsScreen} />
-            <Stack.Screen name="AISettings" component={AISettingsScreen} />
             <Stack.Screen name="TTSSettings" component={TTSSettingsScreen} />
-            <Stack.Screen name="TranslationSettings" component={TranslationSettingsScreen} />
             <Stack.Screen name="SyncSettings" component={SyncSettingsScreen} />
             <Stack.Screen name="About" component={AboutScreen} />
             <Stack.Screen name="Feedback" component={FeedbackScreen} />

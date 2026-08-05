@@ -31,7 +31,6 @@ interface BookCardActionSheetProps {
   onClose: () => void;
   onShowDetails?: (book: Book) => void;
   onManageTags?: (book: Book) => void;
-  onVectorize?: (book: Book) => void;
   onDelete: (bookId: string, options?: { preserveData?: boolean }) => void;
 }
 
@@ -42,7 +41,6 @@ export function BookCardActionSheet({
   onClose,
   onShowDetails,
   onManageTags,
-  onVectorize,
   onDelete,
 }: BookCardActionSheetProps) {
   const colors = useColors();

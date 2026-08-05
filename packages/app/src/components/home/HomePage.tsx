@@ -4,7 +4,6 @@
 import { DesktopImportActions } from "@/components/home/DesktopImportActions";
 import { GroupPickerPopover } from "@/components/home/GroupPickerPopover";
 import { SyncButton } from "@/components/ui/SyncButton";
-import { triggerVectorizeBook } from "@/lib/rag/vectorize-trigger";
 import { useLibraryStore } from "@/stores/library-store";
 import type { Book, BookGroup, SortField } from "@readany/core/types";
 import {
@@ -12,7 +11,6 @@ import {
   ArrowLeft,
   ArrowUpAZ,
   CheckCheck,
-  Database,
   FolderInput,
   FolderMinus,
   Hash,
@@ -351,15 +349,6 @@ export function HomePage() {
     exitSelectionMode();
   }, [selectedBookIds, removeBook, exitSelectionMode, t]);
 
-  const handleBatchVectorize = useCallback(async () => {
-    if (selectedBookIds.size === 0) return;
-    const selectedBooks = books.filter((b) => selectedBookIds.has(b.id));
-    for (const book of selectedBooks) {
-      triggerVectorizeBook(book.id, book.filePath);
-    }
-    exitSelectionMode();
-  }, [selectedBookIds, books, exitSelectionMode]);
-
   const handleBatchRemoveFromGroup = useCallback(() => {
     if (selectedBookIds.size === 0) return;
     moveBooksToGroup([...selectedBookIds], undefined);
@@ -495,14 +484,6 @@ export function HomePage() {
                   <FolderMinus className="size-4" />
                 </button>
               )}
-              <button
-                type="button"
-                className="rounded-lg p-2 text-muted-foreground hover:bg-muted"
-                title={t("home.vec_vectorize", "向量化")}
-                onClick={handleBatchVectorize}
-              >
-                <Database className="size-4" />
-              </button>
               <button
                 type="button"
                 className="rounded-lg p-2 text-destructive hover:bg-destructive/10"

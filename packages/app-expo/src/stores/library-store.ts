@@ -3,7 +3,6 @@ import {
   extractBookMetadata,
   extractBookMetadataFromFile,
 } from "@/lib/book/metadata-extractor";
-import { queueBook as queueAutoVectorize } from "@/lib/rag/auto-vectorize-service";
 import {
   type ImportBooksResult,
   createEmptyImportBooksResult,
@@ -17,7 +16,6 @@ import type { Book, BookGroup, LibraryFilter, SortField, SortOrder } from "@read
 import { generateId } from "@readany/core/utils";
 import { create } from "zustand";
 import { debouncedSave, loadFromFS } from "./persist";
-import { useVectorModelStore } from "./vector-model-store";
 
 // Hermes (React Native) only supports UTF-8 in TextDecoder.
 // text-encoding polyfill detects the native TextDecoder and skips installing
@@ -200,9 +198,6 @@ async function extractMobileImportMetadata(params: {
   };
 }
 
-function shouldAutoVectorizeMobile(format: Book["format"]): boolean {
-  return format === "epub" || format === "txt" || format === "umd";
-}
 
 /**
  * Ensure raw bytes are UTF-8 encoded. Hermes (React Native) only supports
@@ -406,8 +401,6 @@ async function restoreDeletedMobileBook(
       deletedAt: undefined,
       fileHash,
       syncStatus: "local",
-      isVectorized: false,
-      vectorizeProgress: 0,
       updatedAt: Date.now(),
       lastOpenedAt: Date.now(),
     };
@@ -465,8 +458,6 @@ async function restoreDeletedMobileBook(
       deletedAt: undefined,
       fileHash,
       syncStatus: "local",
-      isVectorized: false,
-      vectorizeProgress: 0,
       updatedAt: Date.now(),
       lastOpenedAt: Date.now(),
     };
@@ -513,8 +504,6 @@ async function restoreDeletedMobileBook(
     deletedAt: undefined,
     fileHash,
     syncStatus: "local",
-    isVectorized: false,
-    vectorizeProgress: 0,
     updatedAt: Date.now(),
     lastOpenedAt: Date.now(),
   };
@@ -955,8 +944,6 @@ export const useLibraryStore = create<LibraryState>((set, get) => ({
                 groupId: deletedMatch?.groupId,
                 progress: deletedMatch?.progress ?? 0,
                 currentCfi: deletedMatch?.currentCfi,
-                isVectorized: false,
-                vectorizeProgress: 0,
                 tags: deletedMatch?.tags ?? [],
                 fileHash,
                 syncStatus: "local",
@@ -974,8 +961,6 @@ export const useLibraryStore = create<LibraryState>((set, get) => ({
                   deletedAt: undefined,
                   progress: book.progress,
                   currentCfi: book.currentCfi,
-                  isVectorized: false,
-                  vectorizeProgress: 0,
                   tags: book.tags,
                   fileHash: book.fileHash,
                   syncStatus: "local",
@@ -991,26 +976,6 @@ export const useLibraryStore = create<LibraryState>((set, get) => ({
               }
               console.log(`[importBooks] TXT imported as EPUB: ${title}`);
 
-              // Auto-vectorize if enabled. Keep failures isolated so a
-              // successful import doesn't get reported as a failed import.
-              try {
-                const vmState = useVectorModelStore.getState();
-                if (
-                  vmState.autoVectorizeOnImport &&
-                  vmState.vectorModelEnabled &&
-                  vmState.hasVectorCapability() &&
-                  shouldAutoVectorizeMobile("txt")
-                ) {
-                  const base64 = bytesToBase64(conversion.epubBytes);
-                  queueAutoVectorize(book, base64, "application/epub+zip");
-                }
-              } catch (autoVectorizeErr) {
-                console.warn(
-                  `[importBooks] Auto-vectorize enqueue failed for ${fileName}:`,
-                  autoVectorizeErr,
-                );
-              }
-              continue;
             } catch (convErr) {
               console.error("[importBooks] TXT conversion failed:", convErr);
               throw convErr;
@@ -1078,8 +1043,6 @@ export const useLibraryStore = create<LibraryState>((set, get) => ({
                 groupId: deletedMatch?.groupId,
                 progress: deletedMatch?.progress ?? 0,
                 currentCfi: deletedMatch?.currentCfi,
-                isVectorized: false,
-                vectorizeProgress: 0,
                 tags: deletedMatch?.tags ?? [],
                 fileHash,
                 syncStatus: "local",
@@ -1097,8 +1060,6 @@ export const useLibraryStore = create<LibraryState>((set, get) => ({
                   deletedAt: undefined,
                   progress: book.progress,
                   currentCfi: book.currentCfi,
-                  isVectorized: false,
-                  vectorizeProgress: 0,
                   tags: book.tags,
                   fileHash: book.fileHash,
                   syncStatus: "local",
@@ -1112,23 +1073,6 @@ export const useLibraryStore = create<LibraryState>((set, get) => ({
               if (fileHash) {
                 duplicateIndex.byHash.set(fileHash, book);
               }
-              console.log(`[importBooks] UMD imported as EPUB: ${title}`);
-
-              try {
-                const vmState = useVectorModelStore.getState();
-                if (
-                  vmState.autoVectorizeOnImport &&
-                  vmState.vectorModelEnabled &&
-                  vmState.hasVectorCapability() &&
-                  shouldAutoVectorizeMobile("umd")
-                ) {
-                  const base64 = bytesToBase64(conversion.epubBytes);
-                  queueAutoVectorize(book, base64, "application/epub+zip");
-                }
-              } catch (autoVectorizeErr) {
-                console.warn(
-                  `[importBooks] Auto-vectorize enqueue failed for ${fileName}:`,
-                  autoVectorizeErr,
                 );
               }
               continue;
@@ -1197,8 +1141,6 @@ export const useLibraryStore = create<LibraryState>((set, get) => ({
             groupId: deletedMatch?.groupId,
             progress: deletedMatch?.progress ?? 0,
             currentCfi: deletedMatch?.currentCfi,
-            isVectorized: false,
-            vectorizeProgress: 0,
             tags: deletedMatch?.tags ?? [],
             fileHash,
             syncStatus: "local",
@@ -1215,60 +1157,9 @@ export const useLibraryStore = create<LibraryState>((set, get) => ({
               deletedAt: undefined,
               progress: book.progress,
               currentCfi: book.currentCfi,
-              isVectorized: false,
-              vectorizeProgress: 0,
               tags: book.tags,
               fileHash: book.fileHash,
-              syncStatus: "local",
-              lastOpenedAt: Date.now(),
-            });
-            debouncedSave("library-books", get().books);
-          } else {
-            await get().addBook(book);
-          }
-          result.imported.push(book);
-          if (fileHash) {
-            duplicateIndex.byHash.set(fileHash, book);
-          }
-
-          // Auto-vectorize if enabled. Keep failures isolated so a
-          // successful import doesn't get reported as a failed import.
-          try {
-            const vmState = useVectorModelStore.getState();
-            if (
-              vmState.autoVectorizeOnImport &&
-              vmState.vectorModelEnabled &&
-              vmState.hasVectorCapability() &&
-              shouldAutoVectorizeMobile(format)
-            ) {
-              const sourceBytes = await platform.readFile(filePath);
-              const base64 = bytesToBase64(sourceBytes);
-              const mimeTypes: Record<string, string> = {
-                epub: "application/epub+zip",
-                pdf: "application/pdf",
-                mobi: "application/x-mobipocket-ebook",
-                azw: "application/vnd.amazon.ebook",
-                azw3: "application/vnd.amazon.ebook",
-                cbz: "application/vnd.comicbook+zip",
-                cbr: "application/vnd.comicbook+zip",
-                fb2: "application/x-fictionbook+xml",
-                fbz: "application/x-zip-compressed-fb2",
-                txt: "text/plain",
               };
-              const mimeType = mimeTypes[format] || "application/epub+zip";
-              queueAutoVectorize(book, base64, mimeType);
-            } else if (vmState.autoVectorizeOnImport && vmState.vectorModelEnabled) {
-              console.warn(
-                `[importBooks] Skip auto-vectorize for unsupported mobile import: ${fileName} (${fileSize} bytes, format=${format})`,
-              );
-            }
-          } catch (autoVectorizeErr) {
-            console.warn(
-              `[importBooks] Auto-vectorize enqueue failed for ${fileName}:`,
-              autoVectorizeErr,
-            );
-          }
-        } catch (err) {
           console.error(`Failed to import ${fileInfo.uri}:`, err);
           result.failures.push({
             name: originalName,
@@ -1302,12 +1193,6 @@ export const useLibraryStore = create<LibraryState>((set, get) => ({
       await db.updateBook(restoredBook.id, {
         filePath: restoredBook.filePath,
         format: restoredBook.format,
-        meta: restoredBook.meta,
-        deletedAt: undefined,
-        progress: restoredBook.progress,
-        currentCfi: restoredBook.currentCfi,
-        isVectorized: false,
-        vectorizeProgress: 0,
         tags: restoredBook.tags,
         fileHash: restoredBook.fileHash,
         syncStatus: "local",

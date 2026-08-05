@@ -9,13 +9,12 @@ import { type Tab, useAppStore } from "@/stores/app-store";
 import { useLibraryStore } from "@/stores/library-store";
 import { useReaderStore } from "@/stores/reader-store";
 import { useSyncStore } from "@/stores/sync-store";
-import { BookOpen, FilePenLine, Home, MessageSquare, NotebookPen, X } from "lucide-react";
+import { BookOpen, FilePenLine, Home, NotebookPen, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 const TAB_ICONS: Record<string, React.ElementType> = {
   home: Home,
   reader: BookOpen,
-  chat: MessageSquare,
   notes: NotebookPen,
   epubDraft: FilePenLine,
 };
