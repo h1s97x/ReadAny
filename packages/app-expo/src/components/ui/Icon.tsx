@@ -50,15 +50,6 @@ export const MessageSquareIcon = icon(() => (
   </>
 ));
 
-export const BotIcon = icon(() => (
-  <>
-    <Rect x="4" y="7" width="16" height="12" rx="4" />
-    <Path d="M12 3v4" />
-    <Path d="M8 12h.01" />
-    <Path d="M16 12h.01" />
-    <Path d="M9 16c.8.6 1.8 1 3 1s2.2-.4 3-1" />
-  </>
-));
 
 export const NotebookPenIcon = icon(() => (
   <>
@@ -410,15 +401,6 @@ export const CheckCheckIcon = icon(() => (
   </>
 ));
 
-export const SparklesIcon = icon(() => (
-  <>
-    <Path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
-    <Path d="M5 3v4" />
-    <Path d="M19 17v4" />
-    <Path d="M3 5h4" />
-    <Path d="M17 19h4" />
-  </>
-));
 
 export const LoaderIcon = icon(() => (
   <Path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />

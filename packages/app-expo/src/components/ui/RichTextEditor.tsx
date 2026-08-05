@@ -1,4 +1,3 @@
-import { MarkdownRenderer } from "@/components/chat/MarkdownRenderer";
 import {
   BoldIcon,
   CodeIcon,
