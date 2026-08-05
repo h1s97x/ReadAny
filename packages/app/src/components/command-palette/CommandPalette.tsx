@@ -8,6 +8,7 @@ import {
   Moon,
   Settings,
   Sun,
+  Search,
   Volume2,
 } from "lucide-react";
 /**

@@ -562,7 +562,6 @@ export function ReaderView({ bookId, tabId }: ReaderViewProps) {
   const foliateRef = useRef<FoliateViewerHandle>(null);
 
   // Current section index for TTS / chapter navigation
-  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [currentSectionTotal, setCurrentSectionTotal] = useState<number | null>(null);
   const currentSectionIndexRef = useRef(0);
   const currentSectionTotalRef = useRef<number | null>(null);
@@ -908,7 +907,7 @@ export function ReaderView({ bookId, tabId }: ReaderViewProps) {
     currentSectionIndexRef.current = 0;
     currentSectionTotalRef.current = null;
     currentChapterTitleRef.current = "";
-    setCurrentSectionIndex(0);
+    currentSectionIndexRef.current = 0;
     setCurrentSectionTotal(null);
     resetReaderTTSState({ stopPlayback: false, clearSessionBinding: false });
     if (switchedBook) {
@@ -1368,7 +1367,7 @@ export function ReaderView({ bookId, tabId }: ReaderViewProps) {
   const handleSectionLoad = useCallback(
     (sectionIndex: number) => {
       currentSectionIndexRef.current = sectionIndex;
-      setCurrentSectionIndex(sectionIndex);
+      currentSectionIndexRef.current = sectionIndex;
 
       // Delay slightly to ensure foliate view is ready
       setTimeout(() => {

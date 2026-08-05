@@ -48,60 +48,6 @@ function getThemeColors(theme: AppTheme) {
   return THEME_COLORS[theme];
 }
 
-function getActiveContentDocument(view: FoliateView | null): Document | null {
-  const contents = view?.renderer?.getContents?.();
-  return (contents?.[0]?.doc as Document | undefined) ?? null;
-}
-
-function getLayoutSignature(view: FoliateView | null, doc: Document | null): string {
-  const root = doc?.documentElement;
-  const body = doc?.body;
-  const renderer = view?.renderer;
-  return [
-    root?.scrollWidth ?? 0,
-    root?.scrollHeight ?? 0,
-    body?.scrollWidth ?? 0,
-    body?.scrollHeight ?? 0,
-    renderer?.page ?? "",
-    renderer?.pages ?? "",
-  ].join(":");
-}
-
-function waitForReaderLayoutStable(view: FoliateView | null): Promise<void> {
-  const doc = getActiveContentDocument(view);
-  const win = doc?.defaultView ?? window;
-  const requestFrame =
-    typeof win.requestAnimationFrame === "function"
-      ? win.requestAnimationFrame.bind(win)
-      : (callback: FrameRequestCallback) =>
-          window.setTimeout(() => callback(performance.now()), 16);
-
-  return new Promise((resolve) => {
-    let previous = getLayoutSignature(view, doc);
-    let stableFrames = 0;
-    let frames = 0;
-
-    const tick = () => {
-      frames += 1;
-      const next = getLayoutSignature(view, doc);
-      if (next === previous) {
-        stableFrames += 1;
-      } else {
-        stableFrames = 0;
-        previous = next;
-      }
-
-      if (stableFrames >= 2 || frames >= 12) {
-        resolve();
-        return;
-      }
-
-      requestFrame(tick);
-    };
-
-    requestFrame(tick);
-  });
-}
 
 function getSelectionRange(selection?: Selection | null): Range | null {
   if (!selection?.rangeCount) return null;
