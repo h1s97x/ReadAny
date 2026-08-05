@@ -2,7 +2,6 @@ import {
   CopyIcon,
   HighlighterIcon,
   NotebookPenIcon,
-  SparklesIcon,
   Trash2Icon,
   Volume2Icon,
   XIcon,
@@ -53,7 +52,6 @@ interface Props {
   onHighlight: (color: HighlightColor) => void;
   onDismiss: () => void;
   onCopy: () => void;
-  onAIChat: () => void;
   onSpeak?: (text: string, cfi: string) => void;
   onNote?: (text: string, cfi: string) => void;
   onRemoveHighlight?: () => void;
@@ -66,7 +64,6 @@ export function SelectionPopover({
   onHighlight,
   onDismiss,
   onCopy,
-  onAIChat,
   onSpeak,
   onNote,
   onRemoveHighlight,
@@ -245,11 +242,7 @@ export function SelectionPopover({
             <CopyIcon size={18} color={colors.foreground} />
           </TouchableOpacity>
 
-          )}
 
-          <TouchableOpacity style={s.iconBtn} onPress={onAIChat}>
-            <SparklesIcon size={18} color={colors.foreground} />
-          </TouchableOpacity>
 
           {onSpeak && (
             <TouchableOpacity style={s.iconBtn} onPress={handleSpeak}>

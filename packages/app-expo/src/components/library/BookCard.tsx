@@ -332,8 +332,6 @@ export const BookCard = memo(function BookCard({
             </View>
           )}
 
-          )}
-
           <View ref={menuTriggerRef} style={s.moreButtonWrap} pointerEvents="box-none">
             <TouchableOpacity
               style={s.moreButton}
