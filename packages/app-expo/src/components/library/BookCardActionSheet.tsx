@@ -1,7 +1,6 @@
 import { GroupPickerSheet } from "@/components/library/GroupPickerSheet";
 import {
   CheckIcon,
-  DatabaseIcon,
   FolderInputIcon,
   HashIcon,
   InfoIcon,
@@ -88,33 +87,6 @@ export function BookCardActionSheet({
           onPress: () => {
             onClose();
             onManageTags(book);
-          },
-        }
-      : null,
-    onVectorize
-      ? {
-          key: "vectorize",
-          icon: <DatabaseIcon size={18} color={colors.foreground} />,
-          label: book.isVectorized
-            ? t("home.vec_reindex", "重新索引")
-            : t("home.vec_vectorize", "向量化"),
-          onPress: () => {
-            onClose();
-            if (book.isVectorized) {
-              Alert.alert(
-                t("home.vec_reindex", "重新索引"),
-                t(
-                  "home.vec_reindexConfirm",
-                  "该书已完成索引，重新索引将重置现有数据，确定继续吗？",
-                ),
-                [
-                  { text: t("common.cancel"), style: "cancel" },
-                  { text: t("common.confirm"), onPress: () => onVectorize(book) },
-                ],
-              );
-            } else {
-              onVectorize(book);
-            }
           },
         }
       : null,

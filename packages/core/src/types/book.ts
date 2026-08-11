@@ -48,8 +48,8 @@ export interface Book {
   deletedAt?: number;
   progress: number; // 0-1
   currentCfi?: string; // EPUB CFI position or PDF page marker (e.g. "page-5")
-  isVectorized: boolean;
-  vectorizeProgress: number; // 0-1
+  isVectorized?: boolean;
+  vectorizeProgress?: number;
   tags: string[];
   fileHash?: string;
   syncStatus: "local" | "remote" | "downloading"; // File availability status

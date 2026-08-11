@@ -1,4 +1,4 @@
-import { CheckIcon, ClockIcon, Loader2Icon, MoreVerticalIcon } from "@/components/ui/Icon";
+import { CheckIcon, Loader2Icon, MoreVerticalIcon } from "@/components/ui/Icon";
 import { useColors } from "@/styles/theme";
 import { getPlatformService } from "@readany/core/services";
 /**
@@ -53,9 +53,6 @@ interface BookCardProps {
   onDelete: (bookId: string, options?: { preserveData?: boolean }) => void;
   onShowDetails?: (book: Book) => void;
   onManageTags?: (book: Book) => void;
-  isVectorizing?: boolean;
-  isQueued?: boolean;
-  vectorProgress?: { status: string; processedChunks: number; totalChunks: number } | null;
   downloadProgress?: { downloaded: number; total: number } | null;
   cardWidth?: number;
   isSelectionMode?: boolean;
@@ -70,9 +67,6 @@ export const BookCard = memo(function BookCard({
   onDelete,
   onShowDetails,
   onManageTags,
-  isVectorizing,
-  isQueued,
-  vectorProgress,
   downloadProgress,
   cardWidth = 96,
   isSelectionMode = false,
@@ -116,12 +110,6 @@ export const BookCard = memo(function BookCard({
   }, [book.meta.coverUrl]);
 
   const progressPct = getBookProgressPercent(book.progress);
-
-  const vecPct = vectorProgress
-    ? vectorProgress.totalChunks > 0
-      ? Math.round((vectorProgress.processedChunks / vectorProgress.totalChunks) * 100)
-      : 0
-    : 0;
 
   const measureAnchor = useCallback(async () => {
     const measureNode = (node: View | null, fallbackToBottomRight = false) =>
@@ -281,34 +269,6 @@ export const BookCard = memo(function BookCard({
           {progressPct > 0 && progressPct < 100 && (
             <View style={s.progressBarBg}>
               <View style={[s.progressBarFill, { width: `${progressPct}%` }]} />
-            </View>
-          )}
-
-          {/* Vectorization progress overlay */}
-          {isVectorizing && (
-            <View style={s.vecOverlay}>
-              <AnimatedLoader />
-              <Text style={s.vecOverlayText}>
-                {vectorProgress?.status === "chunking"
-                  ? `${vecPct}%`
-                  : vectorProgress?.status === "embedding"
-                    ? `${vecPct}%`
-                    : vectorProgress?.status === "indexing"
-                      ? t("home.vec_indexing")
-                      : vectorProgress?.status === "completed"
-                        ? "✓"
-                        : vectorProgress?.status === "error"
-                          ? "✗"
-                          : t("home.vec_processing")}
-              </Text>
-            </View>
-          )}
-
-          {/* Queued overlay */}
-          {isQueued && !isVectorizing && (
-            <View style={s.queuedOverlay}>
-              <ClockIcon size={20} color="#fff" />
-              <Text style={s.queuedOverlayText}>{t("home.vec_queued", "排队中")}</Text>
             </View>
           )}
 

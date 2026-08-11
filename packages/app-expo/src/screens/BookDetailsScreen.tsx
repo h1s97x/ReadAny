@@ -619,15 +619,6 @@ export function BookDetailsScreen({ route }: Props) {
             />
             <MetaItem label={t("library.group", "分组")} value={groupName} styles={styles} />
             <MetaItem
-              label={t("library.detailsVector", "向量")}
-              value={
-                book.isVectorized
-                  ? t("home.vec_indexed", "已索引")
-                  : t("home.notVectorized", "未索引")
-              }
-              styles={styles}
-            />
-            <MetaItem
               label={t("library.detailsFormat", "格式")}
               value={book.format.toUpperCase()}
               styles={styles}

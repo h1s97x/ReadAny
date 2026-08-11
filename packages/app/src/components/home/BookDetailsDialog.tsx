@@ -46,7 +46,6 @@ import {
   CalendarDays,
   ChevronDown,
   Cloud,
-  Database,
   FileText,
   Folder,
   HardDrive,
@@ -606,15 +605,6 @@ export function BookDetailsDialog({ book, open, onOpenChange }: BookDetailsDialo
                   icon={<HardDrive className="size-3.5" />}
                   label={t("library.detailsFormat", "Format")}
                   value={book.format.toUpperCase()}
-                />
-                <InfoRow
-                  icon={<Database className="size-3.5" />}
-                  label={t("library.detailsVector", "Vector")}
-                  value={
-                    book.isVectorized
-                      ? t("home.vec_indexed", "Indexed")
-                      : t("home.notVectorized", "Not vectorized")
-                  }
                 />
                 <InfoRow
                   icon={<CalendarDays className="size-3.5" />}
