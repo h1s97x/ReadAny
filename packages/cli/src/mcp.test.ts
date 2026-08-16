@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { buildStoreOnlyZip, type ZipEntry } from "@readany/core/utils/store-only-zip";
 import { describe, expect, it } from "vitest";
 import { getAuditLogFilePath } from "./audit-log.js";
-import { ensureCoreInitialized, resetCoreForTests } from "./data.js";
+import { ensureCoreInitialized } from "./data.js";
 import { handleMcpRequest } from "./mcp.js";
 import { getMinimumProfileForScopes } from "./profiles.js";
 import { READANY_TOOLS } from "./tool-registry.js";
@@ -103,7 +103,6 @@ async function createEnv() {
 }
 
 async function seedBook(env: NodeJS.ProcessEnv): Promise<void> {
-  await resetCoreForTests();
   await ensureCoreInitialized(env);
   const db = new Database(join(env.READANY_HOME!, "readany.db"));
   db.exec(`
@@ -1937,7 +1936,6 @@ describe("mcp", () => {
 
   it("falls back to epub chapters when no chunks are indexed", async () => {
     const env = await createEnv();
-    await resetCoreForTests();
     await ensureCoreInitialized(env);
     const db = new Database(join(env.READANY_HOME!, "readany.db"));
     db.exec(`
@@ -2017,7 +2015,6 @@ describe("mcp", () => {
 
   it("falls back to pdf pages when no chunks are indexed", async () => {
     const env = await createEnv();
-    await resetCoreForTests();
     await ensureCoreInitialized(env);
     const db = new Database(join(env.READANY_HOME!, "readany.db"));
     db.exec(`

@@ -7,7 +7,6 @@ export type PermissionScope =
   | "note.write"
   | "knowledge.read"
   | "knowledge.write"
-  | "rag.search"
   | "epub.inspect"
   | "epub.draft"
   | "epub.export"

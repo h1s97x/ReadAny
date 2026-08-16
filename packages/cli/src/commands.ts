@@ -9,7 +9,7 @@ import { runDoctor } from "./doctor.js";
 import { installCli, uninstallCli, type InstallMode, type InstallOptions } from "./install.js";
 import { getSkillStatus, installSkill, uninstallSkill, updateSkill } from "./skill.js";
 import { appendCliAuditEntry, isCliAuditSource, listCliAuditEntries } from "./audit-log.js";
-import { isRagSearchMode } from "./rag-config.js";
+// RAG imports removed
 import { listTools } from "./tool-registry.js";
 
 export type ParsedCommand = {
@@ -333,11 +333,7 @@ Usage:
   readany books list [--json] [--limit 50]
   readany books search <query> [--json]
   readany book get <book-id> [--json]
-  readany chapters list <book-id> [--json]
-  readany chapter get <book-id> <chapter-id> [--json] [--chunk-start 1] [--chunk-count 5] [--limit 12000]
-  readany context get [--json] [--limit 12000] [--include-selection true|false] [--include-surrounding-text true|false] [--include-highlights true|false]
   readany bookmarks list <book-id> [--json]
-  readany skills list [--json]
   readany epub inspect <book-id> [--json] [--profile editor]
   readany epub draft create <book-id> [--json] [--profile editor]
   readany epub draft discard <draft-id> [--json] [--profile editor] [--reason "..."]
@@ -356,7 +352,6 @@ Usage:
   readany highlights search <query> [--json] [--book <book-id>]
   readany knowledge search <query> [--json] [--book <book-id>] [--limit 20] [--content-limit 240]
   readany knowledge export --output <path> [--json] [--profile publisher] [--format markdown|json|obsidian] [--limit 1000] [--overwrite]
-  readany rag search <query> --book <book-id> [--json] [--mode bm25|hybrid|vector] [--limit 5]
   readany mcp serve --profile readonly
   readany mcp config [--json] [--profile readonly|editor|publisher] [--client generic|claude|cursor|codex|opencode]
 `;
@@ -833,41 +828,6 @@ async function executeCommand(argv: string[], env = process.env): Promise<Comman
       return failure("unknown_book_command", `Unknown book command: ${subcommand}`);
     }
 
-    if (command.name === "chapters") {
-      const data = await getDataApi();
-      const subcommand = command.args[0] ?? "list";
-      if (subcommand === "list") {
-        const bookId = command.args[1];
-        if (!bookId) return failure("missing_book_id", "chapters list requires a book id");
-        return success({ chapters: await data.listIndexedChapters({ bookId, env }) });
-      }
-      return failure("unknown_chapters_command", `Unknown chapters command: ${subcommand}`);
-    }
-
-    if (command.name === "chapter") {
-      const data = await getDataApi();
-      const subcommand = command.args[0] ?? "get";
-      if (subcommand === "get") {
-        const bookId = command.args[1];
-        const chapterId = command.args[2];
-        if (!bookId) return failure("missing_book_id", "chapter get requires a book id");
-        if (!chapterId) return failure("missing_chapter_id", "chapter get requires a chapter id");
-        const chapter = await data.getIndexedChapter({
-          bookId,
-          chapterId,
-          chunkStart: getNumberOption(command, "chunk-start", 1),
-          chunkCount: getNumberOption(command, "chunk-count", 0, { max: 200 }) || undefined,
-          contentLimit: getLimit(command, 12000, 50000),
-          env,
-        });
-        if (!chapter) {
-          return failure("chapter_not_found", `Chapter ${chapterId} was not found in ${bookId}`);
-        }
-        return success({ chapter });
-      }
-      return failure("unknown_chapter_command", `Unknown chapter command: ${subcommand}`);
-    }
-
     if (command.name === "notes") {
       const data = await getDataApi();
       const subcommand = command.args[0] ?? "search";
@@ -995,47 +955,7 @@ async function executeCommand(argv: string[], env = process.env): Promise<Comman
       return failure("unknown_knowledge_command", `Unknown knowledge command: ${subcommand}`);
     }
 
-    if (command.name === "rag") {
-      const data = await getDataApi();
-      const subcommand = command.args[0] ?? "search";
-      if (subcommand === "search") {
-        const query = command.args.slice(1).join(" ");
-        if (!query) return failure("missing_query", "rag search requires a query");
-        const bookId = getStringOption(command, "book");
-        if (!bookId) return failure("missing_book_id", "rag search requires --book <book-id>");
-        const mode = getStringOption(command, "mode") ?? "bm25";
-        if (!isRagSearchMode(mode)) {
-          return failure("unsupported_rag_mode", "--mode must be bm25, hybrid, or vector");
-        }
-        return success({
-          results: await data.searchRag({
-            query,
-            bookId,
-            mode,
-            limit: getLimit(command, 5, 50),
-            env,
-          }),
-        });
-      }
-      return failure("unknown_rag_command", `Unknown rag command: ${subcommand}`);
-    }
-
-    if (command.name === "context") {
-      const data = await getDataApi();
-      const subcommand = command.args[0] ?? "get";
-      if (subcommand === "get") {
-        return success({
-          readerContext: await data.getReaderContextSnapshot({
-            includeSelection: getBooleanOption(command, "include-selection", true),
-            includeSurroundingText: getBooleanOption(command, "include-surrounding-text", true),
-            includeHighlights: getBooleanOption(command, "include-highlights", true),
-            contentLimit: getNumberOption(command, "limit", 12000, { max: 50000 }),
-            env,
-          }),
-        });
-      }
-      return failure("unknown_context_command", `Unknown context command: ${subcommand}`);
-    }
+    // [rag and context handlers removed - AI/RAG features removed]
 
     if (command.name === "epub") {
       const data = await getDataApi();
@@ -1314,15 +1234,6 @@ async function executeCommand(argv: string[], env = process.env): Promise<Comman
         return success({ bookmarks: await data.listBookmarks(bookId, env) });
       }
       return failure("unknown_bookmarks_command", `Unknown bookmarks command: ${subcommand}`);
-    }
-
-    if (command.name === "skills") {
-      const data = await getDataApi();
-      const subcommand = command.args[0] ?? "list";
-      if (subcommand === "list") {
-        return success({ skills: await data.listSkills(env) });
-      }
-      return failure("unknown_skills_command", `Unknown skills command: ${subcommand}`);
     }
 
     return failure("unknown_command", `Unknown command: ${command.name}`);

@@ -17,7 +17,7 @@ import { buildStoreOnlyZip, type ZipEntry } from "@readany/core/utils/store-only
 import { describe, expect, it } from "vitest";
 import { getAuditLogFilePath } from "./audit-log.js";
 import { parseCommand, runCommand } from "./commands.js";
-import { ensureCoreInitialized, resetCoreForTests } from "./data.js";
+import { ensureCoreInitialized } from "./data.js";
 import { createSkillContent } from "./skill.js";
 
 const encoder = new TextEncoder();
@@ -132,7 +132,6 @@ async function createWorkspace() {
 }
 
 async function seedLibrary(dataRoot: string): Promise<void> {
-  await resetCoreForTests();
   await ensureCoreInitialized({ ...process.env, READANY_HOME: dataRoot });
   const db = new Database(join(dataRoot, "readany.db"));
   db.exec(`
@@ -206,7 +205,6 @@ async function seedLibrary(dataRoot: string): Promise<void> {
 }
 
 async function seedVectorLibrary(dataRoot: string): Promise<void> {
-  await resetCoreForTests();
   await ensureCoreInitialized({ ...process.env, READANY_HOME: dataRoot });
   const db = new Database(join(dataRoot, "readany.db"));
   db.exec(`
@@ -2400,7 +2398,6 @@ describe("commands", () => {
 
   it("falls back to epub chapters when no chunks are indexed", async () => {
     const workspace = await createWorkspace();
-    await resetCoreForTests();
     await ensureCoreInitialized(workspace.env);
 
     const db = new Database(join(workspace.dataRoot, "readany.db"));
@@ -2468,7 +2465,6 @@ describe("commands", () => {
 
   it("falls back to pdf pages when no chunks are indexed", async () => {
     const workspace = await createWorkspace();
-    await resetCoreForTests();
     await ensureCoreInitialized(workspace.env);
 
     const db = new Database(join(workspace.dataRoot, "readany.db"));

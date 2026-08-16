@@ -5,7 +5,6 @@ import { failure, success } from "./result.js";
 import type { AccessProfile, PermissionScope } from "./profiles.js";
 import { getMinimumProfileForScopes, parseAccessProfile, profileHasScope } from "./profiles.js";
 import { appendCliAuditEntry, isCliAuditSource, listCliAuditEntries } from "./audit-log.js";
-import { isRagSearchMode } from "./rag-config.js";
 import { listTools } from "./tool-registry.js";
 import type { ReadAnyTool } from "./tool-registry.js";
 import {
@@ -16,14 +15,10 @@ import {
   exportKnowledgeWorkspace,
   getBookById,
   getEpubDraftHistory,
-  getReaderContextSnapshot,
-  getIndexedChapter,
   listBookmarks,
-  listIndexedChapters,
   listBooks,
   listHighlights,
   listNotes,
-  listSkills,
   createEpubDraftForBook,
   inspectEpubBook,
   patchEpubChapter,
@@ -31,7 +26,6 @@ import {
   patchEpubMetadata,
   readEpubChapter,
   rebuildEpubTocWorkspace,
-  searchRag,
   searchBooks,
   searchKnowledgeWorkspace,
   undoEpubDraftWorkspace,
@@ -335,49 +329,8 @@ async function callReadAnyTool(
     return success({ book: await getBookById(bookId, env) });
   }
 
-  if (toolName === "chapters.list") {
-    const bookId = getString(args, "bookId");
-    if (!bookId) return failure("missing_book_id", "chapters.list requires bookId");
-    return success({ chapters: await listIndexedChapters({ bookId, env }) });
-  }
 
-  if (toolName === "chapters.get") {
-    const bookId = getString(args, "bookId");
-    if (!bookId) return failure("missing_book_id", "chapters.get requires bookId");
-    const chapterId = getString(args, "chapterId");
-    if (!chapterId) return failure("missing_chapter_id", "chapters.get requires chapterId");
-    const chapter = await getIndexedChapter({
-      bookId,
-      chapterId,
-      chunkStart: getNumber(args, "chunkStart", 1),
-      chunkCount:
-        typeof args.chunkCount === "number" &&
-        Number.isFinite(args.chunkCount) &&
-        args.chunkCount > 0
-          ? Math.floor(args.chunkCount)
-          : undefined,
-      contentLimit: getNumber(args, "contentLimit", 12000),
-      env,
-    });
-    if (!chapter) {
-      return failure("chapter_not_found", `Chapter ${chapterId} was not found in ${bookId}`);
-    }
-    return success({ chapter });
-  }
 
-  if (toolName === "context.get") {
-    return success({
-      readerContext: await getReaderContextSnapshot({
-        includeSelection: typeof args.includeSelection === "boolean" ? args.includeSelection : true,
-        includeSurroundingText:
-          typeof args.includeSurroundingText === "boolean" ? args.includeSurroundingText : true,
-        includeHighlights:
-          typeof args.includeHighlights === "boolean" ? args.includeHighlights : true,
-        contentLimit: getNumber(args, "contentLimit", 12000),
-        env,
-      }),
-    });
-  }
 
   if (toolName === "bookmarks.list") {
     const bookId = getString(args, "bookId");
@@ -385,9 +338,6 @@ async function callReadAnyTool(
     return success({ bookmarks: await listBookmarks(bookId, env) });
   }
 
-  if (toolName === "skills.list") {
-    return success({ skills: await listSkills(env) });
-  }
 
   if (toolName === "notes.search") {
     const query = getString(args, "query");
@@ -482,22 +432,6 @@ async function callReadAnyTool(
 
   if (toolName === "rag.search") {
     const query = getString(args, "query");
-    if (!query) return failure("missing_query", "rag.search requires query");
-    const bookId = getString(args, "bookId");
-    if (!bookId) return failure("missing_book_id", "rag.search requires bookId");
-    const mode = getString(args, "mode") ?? "bm25";
-    if (!isRagSearchMode(mode)) {
-      return failure("unsupported_rag_mode", "mode must be bm25, hybrid, or vector");
-    }
-    return success({
-      results: await searchRag({
-        query,
-        bookId,
-        mode,
-        limit: getLimit(args, 5),
-        env,
-      }),
-    });
   }
 
   if (toolName === "audit.list") {
