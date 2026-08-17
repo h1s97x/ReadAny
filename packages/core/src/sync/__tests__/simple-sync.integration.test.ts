@@ -48,8 +48,6 @@ const TABLE_COLUMNS: Record<string, string[]> = {
     "updated_at",
     "deleted_at",
     "progress",
-    "is_vectorized",
-    "vectorize_progress",
     "sync_status",
   ],
   highlights: [
@@ -361,12 +359,7 @@ class MemoryBackend implements ISyncBackend {
 }
 
 function sortRow(row: Row): Row {
-  const {
-    is_vectorized: _isVectorized,
-    vectorize_progress: _vectorizeProgress,
-    sync_status: _syncStatus,
-    ...syncedRow
-  } = row;
+  const { sync_status: _syncStatus, ...syncedRow } = row;
   return Object.fromEntries(Object.entries(syncedRow).sort(([a], [b]) => a.localeCompare(b)));
 }
 
@@ -382,8 +375,6 @@ function bookRow(overrides: Row = {}): Row {
     updated_at: 1000,
     deleted_at: null,
     progress: 0,
-    is_vectorized: 1,
-    vectorize_progress: 0.5,
     sync_status: "local",
     ...overrides,
   };

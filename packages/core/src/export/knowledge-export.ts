@@ -141,8 +141,6 @@ function createMissingBook(bookId: string): Book {
     addedAt: 0,
     updatedAt: 0,
     progress: 0,
-    isVectorized: false,
-    vectorizeProgress: 0,
     tags: [],
     syncStatus: "local",
   };

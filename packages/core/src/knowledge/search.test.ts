@@ -26,8 +26,6 @@ const book = {
   addedAt: 1000,
   updatedAt: 1000,
   progress: 0.5,
-  isVectorized: true,
-  vectorizeProgress: 1,
   tags: ["agent"],
   syncStatus: "local",
 } as Book;

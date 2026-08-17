@@ -24,8 +24,6 @@ const books: Book[] = [
     addedAt: 1,
     updatedAt: 1,
     progress: 0.5,
-    isVectorized: false,
-    vectorizeProgress: 0,
     tags: [],
     syncStatus: "local",
   },

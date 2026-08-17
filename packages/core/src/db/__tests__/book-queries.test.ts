@@ -47,8 +47,6 @@ const sampleBook: Book = {
   addedAt: 1000,
   updatedAt: 2000,
   progress: 0.5,
-  isVectorized: false,
-  vectorizeProgress: 0,
   tags: ["fiction"],
   syncStatus: "local",
 };
@@ -92,8 +90,6 @@ describe("book-queries", () => {
           deleted_at: null,
           progress: 0.5,
           current_cfi: "epubcfi(/6/2)",
-          is_vectorized: 0,
-          vectorize_progress: 0,
           tags: '["fiction"]',
           file_hash: null,
           sync_status: "local",
@@ -105,7 +101,6 @@ describe("book-queries", () => {
       expect(books[0].id).toBe("book-1");
       expect(books[0].meta.title).toBe("Test Book");
       expect(books[0].progress).toBe(0.5);
-      expect(books[0].isVectorized).toBe(false);
       expect(mockSelect).toHaveBeenCalledWith(
         "SELECT * FROM books WHERE deleted_at IS NULL ORDER BY last_opened_at DESC, added_at DESC",
       );
@@ -150,8 +145,6 @@ describe("book-queries", () => {
           deleted_at: null,
           progress: 0,
           current_cfi: null,
-          is_vectorized: 0,
-          vectorize_progress: 0,
           tags: "[]",
           file_hash: null,
           sync_status: "local",
@@ -196,8 +189,6 @@ describe("book-queries", () => {
           deleted_at: 2500,
           progress: 0.3,
           current_cfi: null,
-          is_vectorized: 0,
-          vectorize_progress: 0,
           tags: "[]",
           file_hash: "hash-1",
           sync_status: "local",

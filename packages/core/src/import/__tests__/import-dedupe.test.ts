@@ -19,8 +19,6 @@ function createBook(overrides: Partial<Book>): Book {
       coverUrl: overrides.meta?.coverUrl,
     },
     progress: overrides.progress ?? 0,
-    isVectorized: overrides.isVectorized ?? false,
-    vectorizeProgress: overrides.vectorizeProgress ?? 0,
     tags: overrides.tags ?? [],
     fileHash: overrides.fileHash,
     syncStatus: overrides.syncStatus ?? "local",

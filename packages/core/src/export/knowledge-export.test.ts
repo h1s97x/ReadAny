@@ -110,8 +110,6 @@ describe("exportKnowledgeLibrary", () => {
         addedAt: 1,
         updatedAt: 2,
         progress: 0.5,
-        isVectorized: true,
-        vectorizeProgress: 1,
         tags: ["alpha"],
         syncStatus: "local",
       },

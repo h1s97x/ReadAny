@@ -33,8 +33,6 @@ interface BookRow {
   deleted_at: number | null;
   progress: number;
   current_cfi: string | null;
-  is_vectorized: number;
-  vectorize_progress: number;
   tags: string;
   file_hash: string | null;
   sync_status: string;
@@ -67,8 +65,6 @@ function rowToBook(row: BookRow): Book {
     deletedAt: row.deleted_at || undefined,
     progress: row.progress,
     currentCfi: row.current_cfi || undefined,
-    isVectorized: row.is_vectorized === 1,
-    vectorizeProgress: row.vectorize_progress,
     tags: parseJSON(row.tags, []),
     fileHash: row.file_hash || undefined,
     syncStatus: (row.sync_status as Book["syncStatus"]) || "local",
@@ -168,8 +164,8 @@ export async function insertBook(book: Book): Promise<void> {
   const syncVersion = await nextSyncVersion(database, "books");
   const now = Date.now();
   await database.execute(
-    `INSERT INTO books (id, file_path, format, title, author, publisher, language, isbn, description, cover_url, publish_date, rating, reviews, subjects, total_pages, total_chapters, group_id, added_at, last_opened_at, updated_at, deleted_at, progress, current_cfi, is_vectorized, vectorize_progress, tags, file_hash, sync_status, sync_version, last_modified_by)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO books (id, file_path, format, title, author, publisher, language, isbn, description, cover_url, publish_date, rating, reviews, subjects, total_pages, total_chapters, group_id, added_at, last_opened_at, updated_at, deleted_at, progress, current_cfi, tags, file_hash, sync_status, sync_version, last_modified_by)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       book.id,
       book.filePath,
@@ -194,8 +190,6 @@ export async function insertBook(book: Book): Promise<void> {
       book.deletedAt || null,
       book.progress,
       book.currentCfi || null,
-      book.isVectorized ? 1 : 0,
-      book.vectorizeProgress,
       JSON.stringify(book.tags),
       book.fileHash || null,
       book.syncStatus || "local",
@@ -289,14 +283,6 @@ export async function updateBook(id: string, updates: Partial<Book>): Promise<vo
     sets.push("deleted_at = ?");
     values.push(updates.deletedAt ?? null);
   }
-  if (updates.isVectorized !== undefined) {
-    sets.push("is_vectorized = ?");
-    values.push(updates.isVectorized ? 1 : 0);
-  }
-  if (updates.vectorizeProgress !== undefined) {
-    sets.push("vectorize_progress = ?");
-    values.push(updates.vectorizeProgress);
-  }
   if (updates.tags !== undefined) {
     sets.push("tags = ?");
     values.push(JSON.stringify(updates.tags));
@@ -353,7 +339,7 @@ export async function deleteBook(id: string, options: DeleteBookOptions = {}): P
     const updatedAt = await nextUpdatedAt(database, "books", id);
     await database.execute(
       `UPDATE books
-       SET deleted_at = ?, is_vectorized = 0, vectorize_progress = 0,
+       SET deleted_at = ?,
            updated_at = ?, sync_version = ?, last_modified_by = ?
        WHERE id = ?`,
       [deletedAt, updatedAt, syncVersion, deviceId, id],

@@ -112,7 +112,6 @@ export async function cleanupOrphanedSyncRows(databaseArg?: IDatabase): Promise<
     "DELETE FROM reading_sessions WHERE book_id NOT IN (SELECT id FROM books)",
     "DELETE FROM book_tags WHERE book_id NOT IN (SELECT id FROM books) OR tag_id NOT IN (SELECT id FROM tags)",
     "UPDATE books SET group_id = NULL WHERE group_id IS NOT NULL AND group_id NOT IN (SELECT id FROM book_groups)",
-    "DELETE FROM messages WHERE thread_id NOT IN (SELECT id FROM threads)",
   ];
 
   for (const sql of cleanupStatements) {
@@ -358,8 +357,6 @@ export async function initDatabase(): Promise<void> {
       deleted_at INTEGER,
       progress REAL DEFAULT 0,
       current_cfi TEXT,
-      is_vectorized INTEGER DEFAULT 0,
-      vectorize_progress REAL DEFAULT 0,
       tags TEXT DEFAULT '[]'
     )
   `);
@@ -440,48 +437,6 @@ export async function initDatabase(): Promise<void> {
   `);
 
       await database.execute(`
-    CREATE TABLE IF NOT EXISTS threads (
-      id TEXT PRIMARY KEY,
-      book_id TEXT,
-      title TEXT NOT NULL DEFAULT '',
-      memory_summary TEXT,
-      memory_updated_at INTEGER,
-      memory_message_count INTEGER DEFAULT 0,
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL
-    )
-  `);
-
-      await database.execute(`
-    CREATE TABLE IF NOT EXISTS messages (
-      id TEXT PRIMARY KEY,
-      thread_id TEXT NOT NULL,
-      role TEXT NOT NULL,
-      content TEXT NOT NULL DEFAULT '',
-      citations TEXT,
-      tool_calls TEXT,
-      reasoning TEXT,
-      created_at INTEGER NOT NULL,
-      FOREIGN KEY (thread_id) REFERENCES threads(id) ON DELETE CASCADE
-    )
-  `);
-
-      await database.execute(`
-    CREATE TABLE IF NOT EXISTS skills (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      description TEXT NOT NULL DEFAULT '',
-      icon TEXT,
-      enabled INTEGER DEFAULT 1,
-      parameters TEXT DEFAULT '[]',
-      prompt TEXT DEFAULT '',
-      built_in INTEGER DEFAULT 0,
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL
-    )
-  `);
-
-      await database.execute(`
     CREATE TABLE IF NOT EXISTS reading_sessions (
       id TEXT PRIMARY KEY,
       book_id TEXT NOT NULL,
@@ -503,9 +458,6 @@ export async function initDatabase(): Promise<void> {
       await database.execute("CREATE INDEX IF NOT EXISTS idx_notes_book ON notes(book_id)");
       await database.execute("CREATE INDEX IF NOT EXISTS idx_bookmarks_book ON bookmarks(book_id)");
       await database.execute(
-        "CREATE INDEX IF NOT EXISTS idx_messages_thread ON messages(thread_id)",
-      );
-      await database.execute(
         "CREATE INDEX IF NOT EXISTS idx_reading_sessions_book ON reading_sessions(book_id)",
       );
       // Migrations: add columns that may be missing from older schema versions
@@ -525,16 +477,6 @@ export async function initDatabase(): Promise<void> {
         // Column already exists, ignore
       }
       await database.execute("CREATE INDEX IF NOT EXISTS idx_books_group ON books(group_id)");
-      try {
-        await database.execute("ALTER TABLE messages ADD COLUMN reasoning TEXT");
-      } catch {
-        // Column already exists, ignore
-      }
-      try {
-        await database.execute("ALTER TABLE messages ADD COLUMN parts_order TEXT");
-      } catch {
-        // Column already exists, ignore
-      }
       // --- Sync migrations ---
       // Migration 4: Add updated_at and file_hash to books
       try {
@@ -592,9 +534,6 @@ export async function initDatabase(): Promise<void> {
         "book_tags",
         "book_groups",
         "reading_sessions",
-        "threads",
-        "messages",
-        "skills",
       ];
       for (const table of syncTables) {
         try {
