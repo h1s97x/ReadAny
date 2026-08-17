@@ -10,14 +10,6 @@ export { UmdToEpubConverter } from "./umd-to-epub";
 export type { Umd2EpubOptions, UmdBytesConversionResult } from "./umd-to-epub";
 export { parseUmd } from "./umd-parser";
 export type { UmdParsed, UmdChapter, UmdInflate } from "./umd-parser";
-export {
-  getTimeGroup,
-  getMonthLabel,
-  groupThreadsByTime,
-  groupThreadsByMonth,
-  formatRelativeTimeShort,
-} from "./time-group";
-export type { TimeGroup, GroupedThreads } from "./time-group";
 export { encodeConfig, decodeConfig } from "./config-transfer";
 export {
   buildBookMetadataUpdate,
