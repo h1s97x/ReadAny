@@ -60,15 +60,6 @@ export default defineConfig({
           ],
         },
         {
-          label: "AI Features",
-          translations: { "zh-CN": "AI 功能" },
-          items: [
-            { slug: "support/ai/chat" },
-            { slug: "support/ai/semantic-search" },
-            { slug: "support/ai/providers" },
-          ],
-        },
-        {
           label: "Sync & Export",
           translations: { "zh-CN": "同步与导出" },
           items: [{ slug: "support/sync/webdav" }, { slug: "support/sync/export-notes" }],

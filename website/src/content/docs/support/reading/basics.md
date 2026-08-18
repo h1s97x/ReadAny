@@ -29,8 +29,6 @@ Select text in the reader to reveal the action toolbar:
 - **Highlight** — Choose from 5 colors to highlight the selected text
 - **Note** — Add a Markdown note attached to the selection
 - **Copy** — Copy the selected text to clipboard
-- **Translate** — Translate the selected text
-- **Ask AI** — Ask the AI about the selected text
 
 ## Sidebar Panels
 
@@ -38,5 +36,3 @@ The reader sidebar includes:
 - **Table of Contents** — Chapter navigation
 - **Annotations** — View and manage all highlights and notes
 - **Search** — Full-text search within the book
-- **AI Chat** — Chat with AI about the book
-- **Mind Map** — Visual chapter structure overview

@@ -5,15 +5,15 @@
 <h1 align="center">ReadAny</h1>
 
 <p align="center">
-  <strong>本地优先的 AI 电子书阅读器，覆盖桌面端与移动端</strong>
+  <strong>本地优先的电子书阅读器，覆盖桌面端与移动端</strong>
 </p>
 
 <p align="center">
-  <em>"为什么读完就忘？为什么笔记零散？为什么搜索只能找关键词？"</em>
+  <em>"本地优先的电子书阅读器，支持高亮、笔记、TTS 与跨设备同步。"</em>
 </p>
 
 <p align="center">
-  ReadAny 帮你向书籍提问、按语义寻找观点，并用 RAG 对话、语义搜索、高亮笔记、TTS 与 WebDAV 同步构建私有阅读知识库。
+  ReadAny 帮助你阅读、标注和管理你的电子书库，支持高亮、笔记、TTS、阅读统计与 WebDAV 同步。
 </p>
 
 <p align="center">
@@ -36,34 +36,23 @@
 
 > 🚀 **v2.0 更新**: 移动端应用（iOS/Android）现已上线！详见下方 [移动端](#移动端应用) 章节。
 
-## AI 原生阅读工作流
-
-- **和书库对话** - 围绕当前书籍、选中文本和阅读位置提问，答案基于你的阅读上下文生成
-- **按语义找内容** - 向量检索 + BM25 混合搜索，不记得原文关键词也能找回相关概念
-- **知识留在本地** - 本地 embeddings 与本地向量库，让书籍、高亮和笔记具备离线可用能力
-- **接入常用模型** - 支持 OpenAI、Claude、Gemini、Ollama、DeepSeek 以及兼容接口
-
 ## 为什么选择 ReadAny？
 
 | 痛点 | 传统阅读器 | ReadAny |
 |------|-----------|---------|
-| 搜索内容 | 只能关键词 | **语义搜索**，理解你的意图 |
-| 提问书籍 | 自己翻找答案 | **AI 直接回答 + 定位** |
+| 搜索内容 | 只能关键词 | **全文搜索**，覆盖整个书库 |
+| 提问书籍 | 自己翻找答案 | **搜索并跳转**到相关段落 |
 | 做笔记 | 手动复制粘贴 | **选中即高亮**，一键导出 |
 | 知识管理 | 笔记散落各处 | **统一管理**，多格式导出 |
-| 隐私安全 | 上传云端 | **本地向量库**，完全离线可用 |
+| 隐私安全 | 上传云端 | **本地优先**，完全离线可用 |
 
 ### 与竞品对比
 
 | 特性 | ReadAny | Calibre | KOReader | Apple Books |
 |------|---------|---------|----------|-------------|
-| AI 对话 | ✅ | ❌ | ❌ | ❌ |
-| 语义搜索 (RAG) | ✅ | ❌ | ❌ | ❌ |
-| 本地向量库 | ✅ | - | - | ❌ |
 | TTS 语音朗读 | ✅ | ❌ | 有限 | 有限 |
 | 阅读统计 | ✅ | ❌ | ❌ | 有限 |
 | WebDAV 同步 | ✅ | ❌ | ❌ | ❌ |
-| 技能系统 | ✅ | ❌ | ❌ | ❌ |
 | 多格式支持 | 10+ | 15+ | 10+ | 2 |
 | 笔记导出 | 5 种格式 | 有限 | 有限 | 有限 |
 | 开源免费 | ✅ | ✅ | ✅ | ❌ |
@@ -76,13 +65,6 @@
 
 <div align="center">
   <img src="assets/hero-screenshot.png" width="80%" alt="ReadAny 主界面">
-</div>
-
-### AI 智能对话
-
-<div align="center">
-  <img src="assets/ai-chat-desktop.png" width="60%" alt="AI 对话 - 桌面端">
-  <img src="assets/ai-chat-mobile.png" width="20%" alt="AI 对话 - 移动端">
 </div>
 
 ### 笔记和高亮
@@ -116,14 +98,6 @@
 ---
 
 ## 核心功能
-
-### 🤖 AI 智能阅读
-
-- **智能对话** - 针对书籍内容提问，AI 知道你的位置、选中文字、高亮笔记
-- **语义搜索** - 超越关键词，向量检索 + BM25 混合搜索
-- **即时翻译** - AI 翻译或 DeepL，支持 19 种语言
-- **多模型支持** - OpenAI、Claude、Gemini、Ollama、DeepSeek
-- **技能系统** - 内置技能（摘要、概念解释、角色追踪等）+ 自定义技能
 
 ### 📝 标注与知识管理
 
@@ -187,11 +161,10 @@ brew tap codedogQBY/readany
 brew install --cask readany
 ```
 
-### 3 步上手
+### 2 步上手
 
 1. **导入书籍** - 拖拽文件到书库
 2. **开始阅读** - 双击打开，沉浸体验
-3. **配置 AI**（可选）- 设置 → AI → 填入 API Key
 
 ### 移动端应用
 
@@ -229,17 +202,6 @@ Expo Go。Expo Go 无法加载 ReadAny 当前依赖的原生模块和应用配�
 
 移动端源码位于 [`packages/app-expo`](packages/app-expo)。
 
-### AI 配置
-
-| Provider | 获取方式 |
-|----------|---------|
-| OpenAI | [platform.openai.com](https://platform.openai.com/) |
-| Anthropic Claude | [console.anthropic.com](https://console.anthropic.com/) |
-| Google Gemini | [aistudio.google.com](https://aistudio.google.com/) |
-| Ollama / DeepSeek | 本地或自定义端点 |
-
----
-
 ## 技术栈
 
 | 层级 | 技术 |
@@ -252,8 +214,6 @@ Expo Go。Expo Go 无法加载 ReadAny 当前依赖的原生模块和应用配�
 | 状态 | [Zustand](https://zustand.docs.pmnd.rs/) |
 | 数据库 | SQLite |
 | 电子书 | [foliate-js](https://github.com/johnfactotum/foliate-js) |
-| AI/LLM | [LangChain.js](https://js.langchain.com/) + [LangGraph](https://langchain-ai.github.io/langgraphjs/) |
-| 嵌入模型 | [Transformers.js](https://huggingface.co/docs/transformers.js) |
 
 ---
 
@@ -297,9 +257,7 @@ iOS 的 Xcode 或 Android 的 Android Studio/SDK。
 - [x] **移动端应用** — iOS 和 Android 版本已上线
 - [x] **TTS 语音朗读** — Edge TTS，多音色
 - [x] **阅读统计** — 热力图、趋势、连续天数
-- [x] **技能系统** — 内置 + 自定义 AI 技能
 - [x] **WebDAV 同步** — 跨设备同步
-- [ ] 更多 AI 模型（Qwen、GLM、Llama）
 - [ ] PDF 重排/重渲染
 - [ ] 插件系统
 - [ ] 官方云同步服务
@@ -331,7 +289,6 @@ iOS 的 Xcode 或 Android 的 Android Studio/SDK。
 - [foliate-js](https://github.com/johnfactotum/foliate-js) - 电子书渲染引擎
 - [Tauri](https://tauri.app/) - 跨平台桌面框架
 - [Expo](https://expo.dev/) - React Native 开发平台
-- [LangChain.js](https://js.langchain.com/) - AI 编排框架
 - [Radix UI](https://www.radix-ui.com/) - 无障碍 UI 组件
 - [Lucide](https://lucide.dev/) - 图标库
 

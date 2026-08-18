@@ -165,11 +165,10 @@ brew tap codedogQBY/readany
 brew install --cask readany
 ```
 
-### 3 Steps to Get Started
+### 2 Steps to Get Started
 
 1. **Import Books** - Drag and drop files into library
 2. **Start Reading** - Double-click to open, immersive experience
-3. **Start Reading** - Double-click to open, immersive experience
 
 ### Mobile Apps
 
