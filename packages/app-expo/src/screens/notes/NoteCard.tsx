@@ -1,4 +1,4 @@
-import { MarkdownRenderer } from "@/components/chat/MarkdownRenderer";
+import { MarkdownRenderer } from "@/components/ui/MarkdownRenderer";
 import { CheckIcon, EditIcon, Trash2Icon, XIcon } from "@/components/ui/Icon";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import { useColors } from "@/styles/theme";

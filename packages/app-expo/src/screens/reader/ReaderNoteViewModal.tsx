@@ -1,7 +1,7 @@
 /**
  * ReaderNoteViewModal — modal for viewing and editing an existing highlight's note.
  */
-import { MarkdownRenderer } from "@/components/chat/MarkdownRenderer";
+import { MarkdownRenderer } from "@/components/ui/MarkdownRenderer";
 import { CheckIcon, EditIcon, XIcon } from "@/components/ui/Icon";
 import { useResponsiveLayout } from "@/hooks/use-responsive-layout";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";

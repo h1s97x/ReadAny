@@ -14,6 +14,7 @@ import {
   StrikethroughIcon,
   XIcon,
 } from "@/components/ui/Icon";
+import { MarkdownRenderer } from "@/components/ui/MarkdownRenderer";
 import { radius, useColors } from "@/styles/theme";
 import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
