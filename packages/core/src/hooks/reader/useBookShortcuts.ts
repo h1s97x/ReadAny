@@ -13,7 +13,6 @@ interface UseBookShortcutsOptions {
   viewRef: React.RefObject<FoliateView | null>;
   onToggleSearch?: () => void;
   onToggleToc?: () => void;
-  onToggleChat?: () => void;
   enabled?: boolean;
 }
 
@@ -22,7 +21,6 @@ export function useBookShortcuts({
   viewRef,
   onToggleSearch,
   onToggleToc,
-  onToggleChat: _onToggleChat,
   enabled = true,
 }: UseBookShortcutsOptions) {
   const getScrollDistance = useCallback((view: FoliateView) => {

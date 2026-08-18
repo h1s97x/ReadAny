@@ -50,8 +50,6 @@
     "i18next": "^25.8.13",
     "lucide-react": "^0.468.0",
     "marked": "^17.0.3",
-    "markmap-lib": "^0.18.12",
-    "markmap-view": "^0.18.12",
     "pdfjs-dist": "^5.5.207",
     "qrcode.react": "^4.2.0",
     "react": "^19.1.0",

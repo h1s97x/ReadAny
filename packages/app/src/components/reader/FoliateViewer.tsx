@@ -593,7 +593,6 @@ interface FoliateViewerProps {
   onShowAnnotation?: (cfi: string, range: Range, index: number) => void;
   onToggleSearch?: () => void;
   onToggleToc?: () => void;
-  onToggleChat?: () => void;
 }
 
 interface LinkEventDetail {
@@ -629,7 +628,6 @@ export const FoliateViewer = forwardRef<FoliateViewerHandle, FoliateViewerProps>
       onShowAnnotation,
       onToggleSearch,
       onToggleToc,
-      onToggleChat,
     },
     ref,
   ) {
@@ -1560,7 +1558,6 @@ export const FoliateViewer = forwardRef<FoliateViewerHandle, FoliateViewerProps>
       viewRef,
       onToggleSearch,
       onToggleToc,
-      onToggleChat,
     });
 
     // --- Convert TOC ---
