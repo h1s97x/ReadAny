@@ -32,7 +32,6 @@ describe("tool registry", () => {
       "chapters.get",
       "context.get",
       "bookmarks.list",
-      "skills.list",
       "notes.search",
       "notes.export",
       "knowledge.export",
@@ -100,19 +99,12 @@ describe("tool registry", () => {
     expect(searchTools.every((tool) => tool.inputSchema.required?.includes("query"))).toBe(true);
   });
 
-  it("declares discovery tools for bookmarks and skills", () => {
+  it("declares discovery tools for bookmarks", () => {
     expect(listTools().find((tool) => tool.name === "bookmarks.list")).toMatchObject({
       scopes: ["note.read"],
       risk: "low",
       inputSchema: {
         required: ["bookId"],
-        additionalProperties: false,
-      },
-    });
-    expect(listTools().find((tool) => tool.name === "skills.list")).toMatchObject({
-      scopes: ["stats.read"],
-      risk: "low",
-      inputSchema: {
         additionalProperties: false,
       },
     });
@@ -132,7 +124,7 @@ describe("tool registry", () => {
     const ragTool = listTools().find((tool) => tool.name === "rag.search");
     expect(ragTool?.inputSchema.properties).toMatchObject({
       mode: {
-        enum: ["bm25", "hybrid", "vector"],
+        enum: ["bm25"],
       },
     });
   });

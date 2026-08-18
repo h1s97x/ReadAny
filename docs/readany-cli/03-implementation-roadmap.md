@@ -116,7 +116,6 @@ readany chapter get <book-id> <chapter-id>
 readany notes search <query>
 readany highlights search <query>
 readany bookmarks list <book-id>
-readany skills list
 readany rag search <query> --book <book-id>
 readany epub inspect <book-id> --profile editor
 readany epub draft create <book-id> --profile editor

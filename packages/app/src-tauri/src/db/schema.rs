@@ -28,8 +28,6 @@ pub fn initialize(db_path: &Path) -> Result<()> {
             last_opened_at INTEGER,
             progress REAL DEFAULT 0,
             current_cfi TEXT,
-            is_vectorized INTEGER DEFAULT 0,
-            vectorize_progress REAL DEFAULT 0,
             tags TEXT DEFAULT '[]'
         );
 
@@ -67,24 +65,6 @@ pub fn initialize(db_path: &Path) -> Result<()> {
             created_at INTEGER NOT NULL
         );
 
-        CREATE TABLE IF NOT EXISTS threads (
-            id TEXT PRIMARY KEY,
-            book_id TEXT,
-            title TEXT NOT NULL DEFAULT '',
-            created_at INTEGER NOT NULL,
-            updated_at INTEGER NOT NULL
-        );
-
-        CREATE TABLE IF NOT EXISTS messages (
-            id TEXT PRIMARY KEY,
-            thread_id TEXT NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
-            role TEXT NOT NULL,
-            content TEXT NOT NULL DEFAULT '',
-            citations TEXT,
-            tool_calls TEXT,
-            created_at INTEGER NOT NULL
-        );
-
         CREATE TABLE IF NOT EXISTS reading_sessions (
             id TEXT PRIMARY KEY,
             book_id TEXT NOT NULL REFERENCES books(id) ON DELETE CASCADE,
@@ -106,27 +86,12 @@ pub fn initialize(db_path: &Path) -> Result<()> {
             token_count INTEGER NOT NULL DEFAULT 0,
             start_cfi TEXT,
             end_cfi TEXT,
-            segment_cfis TEXT,
-            embedding BLOB
-        );
-
-        CREATE TABLE IF NOT EXISTS skills (
-            id TEXT PRIMARY KEY,
-            name TEXT NOT NULL,
-            description TEXT NOT NULL DEFAULT '',
-            icon TEXT,
-            enabled INTEGER DEFAULT 1,
-            parameters TEXT DEFAULT '[]',
-            prompt TEXT DEFAULT '',
-            built_in INTEGER DEFAULT 0,
-            created_at INTEGER NOT NULL,
-            updated_at INTEGER NOT NULL
+            segment_cfis TEXT
         );
 
         CREATE INDEX IF NOT EXISTS idx_highlights_book ON highlights(book_id);
         CREATE INDEX IF NOT EXISTS idx_notes_book ON notes(book_id);
         CREATE INDEX IF NOT EXISTS idx_bookmarks_book ON bookmarks(book_id);
-        CREATE INDEX IF NOT EXISTS idx_messages_thread ON messages(thread_id);
         CREATE INDEX IF NOT EXISTS idx_reading_sessions_book ON reading_sessions(book_id);
         CREATE INDEX IF NOT EXISTS idx_chunks_book ON chunks(book_id);
         ",
@@ -180,18 +145,11 @@ pub fn initialize(db_path: &Path) -> Result<()> {
     let _ =
         conn.execute_batch("ALTER TABLE bookmarks ADD COLUMN sync_version INTEGER DEFAULT 0");
     let _ = conn.execute_batch("ALTER TABLE bookmarks ADD COLUMN last_modified_by TEXT");
-    let _ = conn.execute_batch("ALTER TABLE threads ADD COLUMN sync_version INTEGER DEFAULT 0");
-    let _ = conn.execute_batch("ALTER TABLE threads ADD COLUMN last_modified_by TEXT");
-    let _ =
-        conn.execute_batch("ALTER TABLE messages ADD COLUMN sync_version INTEGER DEFAULT 0");
-    let _ = conn.execute_batch("ALTER TABLE messages ADD COLUMN last_modified_by TEXT");
     let _ = conn.execute_batch(
         "ALTER TABLE reading_sessions ADD COLUMN sync_version INTEGER DEFAULT 0",
     );
     let _ =
         conn.execute_batch("ALTER TABLE reading_sessions ADD COLUMN last_modified_by TEXT");
-    let _ = conn.execute_batch("ALTER TABLE skills ADD COLUMN sync_version INTEGER DEFAULT 0");
-    let _ = conn.execute_batch("ALTER TABLE skills ADD COLUMN last_modified_by TEXT");
 
     Ok(())
 }

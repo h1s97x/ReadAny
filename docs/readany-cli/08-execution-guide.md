@@ -45,7 +45,6 @@ ReadAny CLI 不是给人手敲命令玩的独立小工具，而是 ReadAny 的�
 - 笔记搜索
 - 高亮搜索
 - 书签列表
-- skills 列表
 - BM25 RAG 检索
 
 ### 第三类：外部 AI 入口
@@ -149,7 +148,7 @@ Draft 工作区：用户手动编辑、看 diff、撤销、导出。
 - doctor
 - install / uninstall
 - skill 管理
-- books / notes / highlights / bookmarks / skills 查询
+- books / notes / highlights / bookmarks 查询
 - BM25 RAG 检索
 - indexed chapters
 - EPUB inspect / draft create / draft chapter read

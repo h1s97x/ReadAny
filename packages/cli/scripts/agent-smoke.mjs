@@ -436,17 +436,17 @@ export async function seedLibrary(dataRoot) {
       id, file_path, format, title, author, publisher, language, isbn, description,
       cover_url, publish_date, rating, reviews, subjects, total_pages, total_chapters,
       group_id, added_at, last_opened_at, updated_at, deleted_at, progress, current_cfi,
-      is_vectorized, vectorize_progress, tags, file_hash, sync_status
+      tags, file_hash, sync_status
     ) VALUES (
       'agent-smoke-book', 'books/agent-smoke.epub', 'epub', 'Agent Smoke Book', 'ReadAny CLI',
       NULL, 'en', NULL, 'External agent smoke fixture', NULL, NULL, NULL, NULL, '["AI"]',
-      100, 2, NULL, 1000, 2000, 3000, NULL, 0.5, 'epubcfi(/6/2)', 1, 1,
+      100, 2, NULL, 1000, 2000, 3000, NULL, 0.5, 'epubcfi(/6/2)',
       '["agent","smoke"]', 'hash-agent-smoke', 'local'
     ),
     (
       'agent-smoke-pdf', 'books/agent-smoke.pdf', 'pdf', 'Agent Smoke PDF', 'ReadAny CLI',
       NULL, 'en', NULL, 'External agent PDF fallback fixture', NULL, NULL, NULL, NULL, '["AI","PDF"]',
-      2, 2, NULL, 1100, 2100, 3100, NULL, 0.25, 'page:1', 0, 0,
+      2, 2, NULL, 1100, 2100, 3100, NULL, 0.25, 'page:1',
       '["agent","smoke","pdf"]', 'hash-agent-smoke-pdf', 'local'
     );
 
@@ -471,17 +471,17 @@ export async function seedLibrary(dataRoot) {
   localDb.exec(`
     INSERT INTO chunks (
       id, book_id, chapter_index, chapter_title, content, token_count,
-      start_cfi, end_cfi, segment_cfis, embedding, updated_at
+      start_cfi, end_cfi, segment_cfis, updated_at
     ) VALUES
     (
       'agent-smoke-chunk-1', 'agent-smoke-book', 1, 'External Access',
       'External agents can search ReadAny through bounded MCP tools.',
-      9, 'epubcfi(/6/10)', 'epubcfi(/6/12)', '["epubcfi(/6/10)"]', NULL, 6000
+      9, 'epubcfi(/6/10)', 'epubcfi(/6/12)', '["epubcfi(/6/10)"]', 6000
     ),
     (
       'agent-smoke-chunk-2', 'agent-smoke-book', 2, 'Draft Safety',
       'Draft-first EPUB editing keeps source files unchanged.',
-      8, 'epubcfi(/6/14)', 'epubcfi(/6/16)', '["epubcfi(/6/14)"]', NULL, 6000
+      8, 'epubcfi(/6/14)', 'epubcfi(/6/16)', '["epubcfi(/6/14)"]', 6000
     );
   `);
   localDb.close();
@@ -500,12 +500,12 @@ async function seedExportedBook(dataRoot, exportPath, exportedHash) {
       id, file_path, format, title, author, publisher, language, isbn, description,
       cover_url, publish_date, rating, reviews, subjects, total_pages, total_chapters,
       group_id, added_at, last_opened_at, updated_at, deleted_at, progress, current_cfi,
-      is_vectorized, vectorize_progress, tags, file_hash, sync_status
+      tags, file_hash, sync_status
     ) VALUES (
       'agent-smoke-exported-book', 'books/agent-smoke-exported.epub', 'epub',
       'Agent Smoke Exported Book', 'ReadAny CLI', NULL, 'en', NULL,
       'Reimported external agent smoke export', NULL, NULL, NULL, NULL, '["AI","export"]',
-      100, 2, NULL, 7000, 7000, 7000, NULL, 0, NULL, 0, 0,
+      100, 2, NULL, 7000, 7000, 7000, NULL, 0, NULL,
       '["agent","smoke","exported"]', ?, 'local'
     )
   `).run(exportedHash);

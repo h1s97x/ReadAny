@@ -110,11 +110,11 @@ async function seedBook(env: NodeJS.ProcessEnv): Promise<void> {
       id, file_path, format, title, author, publisher, language, isbn, description,
       cover_url, publish_date, rating, reviews, subjects, total_pages, total_chapters,
       group_id, added_at, last_opened_at, updated_at, deleted_at, progress, current_cfi,
-      is_vectorized, vectorize_progress, tags, file_hash, sync_status
+      tags, file_hash, sync_status
     ) VALUES (
       'mcp-book', 'books/mcp.epub', 'epub', 'MCP for Readers', 'Ada Reader', NULL, 'en',
       NULL, 'MCP access for ReadAny', NULL, NULL, NULL, NULL, '["AI"]',
-      100, 8, NULL, 1000, 2000, 3000, NULL, 0.5, 'epubcfi(/6/2)', 1, 1,
+      100, 8, NULL, 1000, 2000, 3000, NULL, 0.5, 'epubcfi(/6/2)',
       '["mcp"]', 'hash-mcp', 'local'
     );
 
@@ -138,13 +138,6 @@ async function seedBook(env: NodeJS.ProcessEnv): Promise<void> {
     ) VALUES (
       'mcp-bookmark', 'mcp-book', 'epubcfi(/6/32)', 'Return here', 'Agent Access', 8100
     );
-
-    INSERT INTO skills (
-      id, name, description, icon, enabled, parameters, prompt, built_in, created_at, updated_at
-    ) VALUES (
-      'mcp-skill', 'MCP Reviewer', 'Reviews external access plans.', NULL, 1,
-      '[]', 'Review the access plan.', 0, 8200, 8200
-    );
   `);
   db.close();
   await writeFile(join(env.READANY_HOME!, "books", "mcp.epub"), buildInspectableEpub());
@@ -153,22 +146,22 @@ async function seedBook(env: NodeJS.ProcessEnv): Promise<void> {
   localDb.exec(`
     INSERT INTO chunks (
       id, book_id, chapter_index, chapter_title, content, token_count,
-      start_cfi, end_cfi, segment_cfis, embedding, updated_at
+      start_cfi, end_cfi, segment_cfis, updated_at
     ) VALUES
     (
       'mcp-chunk-1', 'mcp-book', 1, 'Agent Access',
       'MCP access lets external agents search ReadAny chunks safely.',
-      9, 'epubcfi(/6/20)', 'epubcfi(/6/22)', '["epubcfi(/6/20)"]', NULL, 6000
+      9, 'epubcfi(/6/20)', 'epubcfi(/6/22)', '["epubcfi(/6/20)"]', 6000
     ),
     (
       'mcp-chunk-1b', 'mcp-book', 1, 'Agent Access',
       'Chunk range controls keep MCP chapter reads bounded.',
-      8, 'epubcfi(/6/22)', 'epubcfi(/6/23)', '["epubcfi(/6/22)"]', NULL, 6000
+      8, 'epubcfi(/6/22)', 'epubcfi(/6/23)', '["epubcfi(/6/22)"]', 6000
     ),
     (
       'mcp-chunk-2', 'mcp-book', 2, 'Draft Safety',
       'Draft-first editing protects original EPUB files.',
-      7, 'epubcfi(/6/24)', 'epubcfi(/6/26)', '["epubcfi(/6/24)"]', NULL, 6000
+      7, 'epubcfi(/6/24)', 'epubcfi(/6/26)', '["epubcfi(/6/24)"]', 6000
     );
   `);
   localDb.close();
@@ -214,7 +207,6 @@ describe("mcp", () => {
         { name: "chapters.get" },
         { name: "context.get" },
         { name: "bookmarks.list" },
-        { name: "skills.list" },
         { name: "notes.search" },
         { name: "notes.export" },
         { name: "knowledge.export" },
@@ -381,7 +373,7 @@ describe("mcp", () => {
     });
   });
 
-  it("calls readonly bookmark and skill discovery tools", async () => {
+  it("calls readonly bookmark discovery tools", async () => {
     const env = await createEnv();
     await seedBook(env);
 
@@ -408,32 +400,6 @@ describe("mcp", () => {
             bookId: "mcp-book",
             label: "Return here",
             chapterTitle: "Agent Access",
-          },
-        ],
-      },
-    });
-
-    const skillsResponse = await handleMcpRequest(
-      {
-        method: "tools/call",
-        params: {
-          name: "skills.list",
-          arguments: {},
-        },
-      },
-      "readonly",
-      env,
-    );
-    expect(skillsResponse).toMatchObject({ isError: false });
-    const skillsText = (skillsResponse as { content: Array<{ text: string }> }).content[0].text;
-    expect(JSON.parse(skillsText)).toMatchObject({
-      ok: true,
-      data: {
-        skills: [
-          {
-            id: "mcp-skill",
-            name: "MCP Reviewer",
-            enabled: true,
           },
         ],
       },
@@ -1943,11 +1909,11 @@ describe("mcp", () => {
         id, file_path, format, title, author, publisher, language, isbn, description,
         cover_url, publish_date, rating, reviews, subjects, total_pages, total_chapters,
         group_id, added_at, last_opened_at, updated_at, deleted_at, progress, current_cfi,
-        is_vectorized, vectorize_progress, tags, file_hash, sync_status
+        tags, file_hash, sync_status
       ) VALUES (
         'fallback-book', 'books/fallback.epub', 'epub', 'Fallback Book', 'Ada Reader', NULL, 'en',
         NULL, 'Fallback epub only', NULL, NULL, NULL, NULL, '["AI"]',
-        100, 1, NULL, 1000, 2000, 3000, NULL, 0.5, 'epubcfi(/6/2)', 0, 0,
+        100, 1, NULL, 1000, 2000, 3000, NULL, 0.5, 'epubcfi(/6/2)',
         '["epub"]', 'hash-fallback', 'local'
       );
     `);
@@ -2022,11 +1988,11 @@ describe("mcp", () => {
         id, file_path, format, title, author, publisher, language, isbn, description,
         cover_url, publish_date, rating, reviews, subjects, total_pages, total_chapters,
         group_id, added_at, last_opened_at, updated_at, deleted_at, progress, current_cfi,
-        is_vectorized, vectorize_progress, tags, file_hash, sync_status
+        tags, file_hash, sync_status
       ) VALUES (
         'pdf-fallback-book', 'books/pdf-fallback.pdf', 'pdf', 'Fallback PDF', 'Ada Reader', NULL, 'en',
         NULL, 'Fallback pdf only', NULL, NULL, NULL, NULL, '["AI"]',
-        2, 2, NULL, 1000, 2000, 3000, NULL, 0.5, 'page:1', 0, 0,
+        2, 2, NULL, 1000, 2000, 3000, NULL, 0.5, 'page:1',
         '["pdf"]', 'hash-pdf-fallback', 'local'
       );
     `);

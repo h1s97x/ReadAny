@@ -139,11 +139,11 @@ async function seedLibrary(dataRoot: string): Promise<void> {
       id, file_path, format, title, author, publisher, language, isbn, description,
       cover_url, publish_date, rating, reviews, subjects, total_pages, total_chapters,
       group_id, added_at, last_opened_at, updated_at, deleted_at, progress, current_cfi,
-      is_vectorized, vectorize_progress, tags, file_hash, sync_status
+      tags, file_hash, sync_status
     ) VALUES (
       'book-1', 'books/agent.epub', 'epub', 'Agent Systems', 'Ada Reader', NULL, 'en',
       NULL, 'A book about safe agent architecture', NULL, NULL, NULL, NULL, '["AI"]',
-      100, 8, NULL, 1000, 2000, 3000, NULL, 0.5, 'epubcfi(/6/2)', 1, 1,
+      100, 8, NULL, 1000, 2000, 3000, NULL, 0.5, 'epubcfi(/6/2)',
       '["ai","agent"]', 'hash-1', 'local'
     );
 
@@ -166,14 +166,6 @@ async function seedLibrary(dataRoot: string): Promise<void> {
     ) VALUES (
       'bookmark-1', 'book-1', 'epubcfi(/6/6)', 'Review this section', 'Tools', 5500
     );
-
-    INSERT INTO skills (
-      id, name, description, icon, enabled, parameters, prompt, built_in, created_at, updated_at
-    ) VALUES (
-      'skill-1', 'Chapter Polisher', 'Suggests safer chapter edits.', NULL, 1,
-      '[{"name":"tone","type":"string","description":"Target tone","required":false}]',
-      'Polish chapter text in a controlled draft.', 0, 5600, 5600
-    );
   `);
   db.close();
 
@@ -183,62 +175,22 @@ async function seedLibrary(dataRoot: string): Promise<void> {
   localDb.exec(`
     INSERT INTO chunks (
       id, book_id, chapter_index, chapter_title, content, token_count,
-      start_cfi, end_cfi, segment_cfis, embedding, updated_at
+      start_cfi, end_cfi, segment_cfis, updated_at
     ) VALUES
     (
       'chunk-1', 'book-1', 1, 'Tools',
       'Agents need safe tool boundaries and permissioned local context.',
-      9, 'epubcfi(/6/10)', 'epubcfi(/6/12)', '["epubcfi(/6/10)"]', NULL, 6000
+      9, 'epubcfi(/6/10)', 'epubcfi(/6/12)', '["epubcfi(/6/10)"]', 6000
     ),
     (
       'chunk-1b', 'book-1', 1, 'Tools',
       'Bounded chapter ranges keep external AI responses compact.',
-      8, 'epubcfi(/6/12)', 'epubcfi(/6/13)', '["epubcfi(/6/12)"]', NULL, 6000
+      8, 'epubcfi(/6/12)', 'epubcfi(/6/13)', '["epubcfi(/6/12)"]', 6000
     ),
     (
       'chunk-2', 'book-1', 2, 'Drafts',
       'Draft-first editing keeps EPUB sources safe while AI proposes changes.',
-      10, 'epubcfi(/6/14)', 'epubcfi(/6/16)', '["epubcfi(/6/14)"]', NULL, 6000
-    );
-  `);
-  localDb.close();
-}
-
-async function seedVectorLibrary(dataRoot: string): Promise<void> {
-  await ensureCoreInitialized({ ...process.env, READANY_HOME: dataRoot });
-  const db = new Database(join(dataRoot, "readany.db"));
-  db.exec(`
-    INSERT INTO books (
-      id, file_path, format, title, author, publisher, language, isbn, description,
-      cover_url, publish_date, rating, reviews, subjects, total_pages, total_chapters,
-      group_id, added_at, last_opened_at, updated_at, deleted_at, progress, current_cfi,
-      is_vectorized, vectorize_progress, tags, file_hash, sync_status
-    ) VALUES (
-      'vector-book', 'books/vector.epub', 'epub', 'Vector Search', 'Ada Reader', NULL, 'en',
-      NULL, 'A book with embeddings for semantic search', NULL, NULL, NULL, NULL, '["AI"]',
-      120, 6, NULL, 1000, 2000, 3000, NULL, 0.5, 'epubcfi(/6/2)', 1, 1,
-      '["vector"]', 'hash-vector', 'local'
-    );
-  `);
-  db.close();
-
-  const localDb = new Database(join(dataRoot, "readany_local.db"));
-  localDb.exec(`
-    INSERT INTO chunks (
-      id, book_id, chapter_index, chapter_title, content, token_count,
-      start_cfi, end_cfi, segment_cfis, embedding, updated_at
-    ) VALUES
-    (
-      'vector-chunk-1', 'vector-book', 1, 'Embeddings',
-      'Semantic search should match meaning rather than surface terms.',
-      9, 'epubcfi(/6/18)', 'epubcfi(/6/20)', '["epubcfi(/6/18)"]',
-      x'000000000000803f0000003f', 6000
-    ),
-    (
-      'vector-chunk-2', 'vector-book', 2, 'Fallback',
-      'Hybrid search can still fall back to BM25 when vectors are unavailable.',
-      10, 'epubcfi(/6/22)', 'epubcfi(/6/24)', '["epubcfi(/6/22)"]',
-      x'0000803f0000000000000000', 6000
+      10, 'epubcfi(/6/14)', 'epubcfi(/6/16)', '["epubcfi(/6/14)"]', 6000
     );
   `);
   localDb.close();
@@ -823,13 +775,13 @@ describe("commands", () => {
           builtBundle: false,
           desktopResourceBundle: false,
         },
-        tools: { count: 28 },
+        tools: { count: 27 },
         mcp: {
           defaultProfile: "readonly",
           serveArgs: ["mcp", "serve", "--profile", "readonly"],
           supportedProfiles: ["readonly", "assistant", "editor", "publisher"],
           supportedClients: ["generic", "claude", "cursor", "codex", "opencode"],
-          toolCount: 28,
+          toolCount: 27,
         },
         agentAccess: {
           cliShim: {
@@ -1126,7 +1078,7 @@ describe("commands", () => {
     }
   });
 
-  it("lists bookmarks and skills from the CLI", async () => {
+  it("lists bookmarks from the CLI", async () => {
     const workspace = await createWorkspace();
     await seedLibrary(workspace.dataRoot);
 
@@ -1149,29 +1101,6 @@ describe("commands", () => {
     expect(missingBook).toMatchObject({
       ok: false,
       error: { code: "missing_book_id" },
-    });
-
-    const skills = await runCommand(["skills", "list"], workspace.env);
-    expect(skills).toMatchObject({
-      ok: true,
-      data: {
-        skills: [
-          {
-            id: "skill-1",
-            name: "Chapter Polisher",
-            enabled: true,
-            builtIn: false,
-            parameters: [
-              {
-                name: "tone",
-                type: "string",
-                description: "Target tone",
-                required: false,
-              },
-            ],
-          },
-        ],
-      },
     });
   });
 
@@ -2406,11 +2335,11 @@ describe("commands", () => {
         id, file_path, format, title, author, publisher, language, isbn, description,
         cover_url, publish_date, rating, reviews, subjects, total_pages, total_chapters,
         group_id, added_at, last_opened_at, updated_at, deleted_at, progress, current_cfi,
-        is_vectorized, vectorize_progress, tags, file_hash, sync_status
+        tags, file_hash, sync_status
       ) VALUES (
         'epub-book', 'books/epub-book.epub', 'epub', 'Fallback EPUB', 'Ada Reader', NULL, 'en',
         NULL, 'A fallback epub only', NULL, NULL, NULL, NULL, '["AI"]',
-        100, 2, NULL, 1000, 2000, 3000, NULL, 0.5, 'epubcfi(/6/2)', 0, 0,
+        100, 2, NULL, 1000, 2000, 3000, NULL, 0.5, 'epubcfi(/6/2)',
         '["epub"]', 'hash-epub', 'local'
       );
     `);
@@ -2473,11 +2402,11 @@ describe("commands", () => {
         id, file_path, format, title, author, publisher, language, isbn, description,
         cover_url, publish_date, rating, reviews, subjects, total_pages, total_chapters,
         group_id, added_at, last_opened_at, updated_at, deleted_at, progress, current_cfi,
-        is_vectorized, vectorize_progress, tags, file_hash, sync_status
+        tags, file_hash, sync_status
       ) VALUES (
         'pdf-book', 'books/pdf-book.pdf', 'pdf', 'Fallback PDF', 'Ada Reader', NULL, 'en',
         NULL, 'A fallback pdf only', NULL, NULL, NULL, NULL, '["AI"]',
-        2, 2, NULL, 1000, 2000, 3000, NULL, 0.5, 'page:1', 0, 0,
+        2, 2, NULL, 1000, 2000, 3000, NULL, 0.5, 'page:1',
         '["pdf"]', 'hash-pdf', 'local'
       );
     `);
@@ -2720,72 +2649,6 @@ describe("commands", () => {
       ok: false,
       error: { code: "missing_book_id" },
     });
-  });
-
-  it("allows hybrid rag mode to fall back to BM25 without embeddings", async () => {
-    const workspace = await createWorkspace();
-    await seedLibrary(workspace.dataRoot);
-
-    const result = await runCommand(
-      ["rag", "search", "context", "--book", "book-1", "--mode", "hybrid"],
-      workspace.env,
-    );
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.data.results[0]).toMatchObject({
-      matchType: "bm25",
-      chunk: {
-        id: "chunk-1",
-      },
-    });
-  });
-
-  it("requires embedding configuration for vector rag mode", async () => {
-    const workspace = await createWorkspace();
-    await seedLibrary(workspace.dataRoot);
-
-    const result = await runCommand(
-      ["rag", "search", "context", "--book", "book-1", "--mode", "vector"],
-      workspace.env,
-    );
-    expect(result).toMatchObject({
-      ok: false,
-      error: { code: "command_failed" },
-    });
-  });
-
-  it("runs vector rag mode with configured remote embeddings", async () => {
-    const workspace = await createWorkspace();
-    await seedVectorLibrary(workspace.dataRoot);
-    const previousFetch = globalThis.fetch;
-    globalThis.fetch = (async () =>
-      new Response(
-        JSON.stringify({
-          data: [{ index: 0, embedding: [0, 1, 0.5] }],
-        }),
-        { status: 200, headers: { "content-type": "application/json" } },
-      )) as typeof fetch;
-
-    try {
-      const result = await runCommand(
-        ["rag", "search", "semantic meaning", "--book", "vector-book", "--mode", "vector"],
-        {
-          ...workspace.env,
-          READANY_EMBEDDING_MODEL: "test-embedding",
-          READANY_EMBEDDING_BASE_URL: "http://localhost:1234/v1",
-        },
-      );
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      expect(result.data.results[0]).toMatchObject({
-        matchType: "vector",
-        chunk: {
-          id: "vector-chunk-1",
-        },
-      });
-    } finally {
-      globalThis.fetch = previousFetch;
-    }
   });
 
   it("returns unavailable reader context when no snapshot exists", async () => {

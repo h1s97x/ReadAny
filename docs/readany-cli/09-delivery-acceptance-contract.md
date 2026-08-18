@@ -54,7 +54,7 @@ ReadAny CLI 的目标不是做一个孤立命令行工具，而是做 ReadAny �
 - 笔记搜索：`notes.search` / `readany notes search`。
 - 高亮搜索：`highlights.search` / `readany highlights search`。
 - 书签列表：`readany bookmarks list`。
-- skills 列表：`readany skills list`。
+
 - 已索引章节目录：`chapters.list` / `readany chapters list`。
 - 已索引章节读取：`chapters.get` / `readany chapter get`。
 - 当前书 / 当前章 / 选区上下文：`context.get` / `readany context get`。

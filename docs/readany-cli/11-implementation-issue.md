@@ -42,7 +42,7 @@ ReadAny 需要把本地阅读能力开放给外部 AI agent，但开放的是受
 - `packages/cli` 独立 package。
 - `readany doctor/install/uninstall/tools list`。
 - `readany skill install/uninstall/status`。
-- 只读书库、笔记、高亮、书签、skills 查询。
+- 只读书库、笔记、高亮、书签。
 - indexed chunks 章节读取和未索引 EPUB/PDF fallback。
 - BM25 RAG over chunks。
 - stdio MCP：`initialize`、`tools/list`、`tools/call`。
@@ -62,7 +62,6 @@ chapters.list
 chapters.get
 context.get
 bookmarks.list
-skills.list
 notes.search
 notes.export
 knowledge.export
@@ -117,7 +116,7 @@ epub.export
 - `readany tools list --json`
 - 用户安装桌面客户端后，客户端能安装、卸载或修复 CLI。
 - CLI 自己可以安装自己、卸载自己，桌面端只是调用入口。
-- `bookmarks.list` 和 `skills.list` 已同步进入 CLI help、MCP registry、MCP tools/call 和单测。
+- `bookmarks.list` 已同步进入 CLI help、MCP registry、MCP tools/call 和单测。
 
 不做：
 
@@ -170,7 +169,7 @@ printf '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}\n' \
 
 - 书籍列表、搜索、详情。
 - 章节目录和范围读取。
-- 笔记、高亮、书签、skills 查询。
+- 笔记、高亮、书签。
 - 全库 knowledge search，聚合搜索书籍 metadata、notes 和 highlights，返回有限 snippet 和引用。
 - BM25 / vector / hybrid RAG。
 - 当前书、当前章、选区上下文资源。

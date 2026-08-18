@@ -128,7 +128,6 @@ readany notes search <query> [--book <book-id>] [--json]
 readany highlights search <query> [--book <book-id>] [--json]
 readany knowledge search <query> [--book <book-id>] [--limit 20] [--json]
 readany bookmarks list <book-id> [--json]
-readany skills list [--json]
 readany rag search <query> --book <book-id> [--mode bm25|hybrid|vector] [--limit 5] [--json]
 readany epub inspect <book-id> [--profile editor] [--json]
 readany epub draft create <book-id> [--profile editor] [--json]
@@ -189,7 +188,6 @@ chapters.list
 chapters.get
 context.get
 bookmarks.list
-skills.list
 notes.search
 notes.export
 knowledge.export
@@ -222,7 +220,6 @@ chapters.list
 chapters.get
 context.get
 bookmarks.list
-skills.list
 notes.search
 notes.export
 knowledge.export

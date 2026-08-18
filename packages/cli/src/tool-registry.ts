@@ -183,16 +183,6 @@ export const READANY_TOOLS: readonly ReadAnyTool[] = [
     },
   },
   {
-    name: "skills.list",
-    description: "List user-defined ReadAny AI skills and whether they are enabled.",
-    scopes: ["stats.read"],
-    risk: "low",
-    inputSchema: {
-      type: "object",
-      additionalProperties: false,
-    },
-  },
-  {
     name: "notes.search",
     description: "Search notes in the ReadAny library.",
     scopes: ["note.read"],
@@ -400,9 +390,8 @@ export const READANY_TOOLS: readonly ReadAnyTool[] = [
         },
         mode: {
           type: "string",
-          enum: ["bm25", "hybrid", "vector"],
-          description:
-            "Search mode. bm25 is always available; hybrid and vector require configured embedding support.",
+          enum: ["bm25"],
+          description: "Search mode. bm25 is always available.",
         },
         limit: {
           type: "number",

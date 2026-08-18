@@ -115,7 +115,6 @@ readany context get --json
 readany notes search <query> --json
 readany highlights search <query> --json
 readany bookmarks list <book-id> --json
-readany skills list --json
 readany rag search <query> --book <book-id> --mode bm25 --json
 readany rag search <query> --book <book-id> --mode hybrid --json
 readany rag search <query> --book <book-id> --mode vector --json

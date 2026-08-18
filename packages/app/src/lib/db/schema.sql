@@ -20,8 +20,6 @@ CREATE TABLE IF NOT EXISTS books (
   group_id TEXT,
   progress REAL DEFAULT 0.0,
   current_cfi TEXT,
-  is_vectorized INTEGER DEFAULT 0,
-  vectorize_progress REAL DEFAULT 0.0,
   added_at INTEGER NOT NULL,
   last_opened_at INTEGER
 );
@@ -81,24 +79,6 @@ CREATE TABLE IF NOT EXISTS bookmarks (
   created_at INTEGER NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS threads (
-  id TEXT PRIMARY KEY,
-  book_id TEXT REFERENCES books(id) ON DELETE SET NULL,
-  title TEXT NOT NULL,
-  created_at INTEGER NOT NULL,
-  updated_at INTEGER NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS messages (
-  id TEXT PRIMARY KEY,
-  thread_id TEXT NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
-  role TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'system')),
-  content TEXT NOT NULL,
-  citations TEXT, -- JSON array
-  tool_calls TEXT, -- JSON array
-  created_at INTEGER NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS reading_sessions (
   id TEXT PRIMARY KEY,
   book_id TEXT NOT NULL REFERENCES books(id) ON DELETE CASCADE,
@@ -113,19 +93,6 @@ CREATE TABLE IF NOT EXISTS reading_sessions (
   end_cfi TEXT
 );
 
-CREATE TABLE IF NOT EXISTS skills (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  description TEXT NOT NULL DEFAULT '',
-  icon TEXT,
-  enabled INTEGER DEFAULT 1,
-  parameters TEXT DEFAULT '[]', -- JSON array
-  prompt TEXT NOT NULL DEFAULT '',
-  built_in INTEGER DEFAULT 0,
-  created_at INTEGER NOT NULL,
-  updated_at INTEGER NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS chunks (
   id TEXT PRIMARY KEY,
   book_id TEXT NOT NULL REFERENCES books(id) ON DELETE CASCADE,
@@ -135,16 +102,13 @@ CREATE TABLE IF NOT EXISTS chunks (
   token_count INTEGER NOT NULL,
   start_cfi TEXT,
   end_cfi TEXT,
-  segment_cfis TEXT,
-  embedding BLOB -- serialized float32 array
+  segment_cfis TEXT
 );
 
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_highlights_book ON highlights(book_id);
 CREATE INDEX IF NOT EXISTS idx_notes_book ON notes(book_id);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_book ON bookmarks(book_id);
-CREATE INDEX IF NOT EXISTS idx_messages_thread ON messages(thread_id);
-CREATE INDEX IF NOT EXISTS idx_threads_book ON threads(book_id);
 CREATE INDEX IF NOT EXISTS idx_reading_sessions_book ON reading_sessions(book_id);
 CREATE INDEX IF NOT EXISTS idx_chunks_book ON chunks(book_id);
 CREATE INDEX IF NOT EXISTS idx_books_last_opened ON books(last_opened_at DESC);

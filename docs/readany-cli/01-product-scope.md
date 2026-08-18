@@ -179,7 +179,7 @@ ReadAny CLI 不是单一命令工具，而是一组逐步开放的本地能力�
 4. `readany tools list`。
 5. `readany books list/search`、`readany book get`。
 6. `readany notes search`、`readany highlights search`。
-7. `readany bookmarks list`、`readany skills list`。
+7. `readany bookmarks list`。
 8. `readany chapters list`、`readany chapter get` 的章节视图：优先 indexed chunks；未索引 EPUB fallback 到真实 EPUB spine/manifest；未索引 PDF fallback 到 page text。
 9. `readany rag search --book <book-id>` 的 BM25 chunk 检索。
 10. `readany epub inspect <book-id> --profile editor` 的只读 EPUB 结构检查。

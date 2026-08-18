@@ -119,13 +119,13 @@ Module._load = function patchedLoad(request, parent, isMain) {
           builtBundle: true,
           desktopResourceBundle: false,
         },
-        tools: { count: 28 },
+        tools: { count: 27 },
         mcp: {
           defaultProfile: "readonly",
           serveArgs: ["mcp", "serve", "--profile", "readonly"],
           supportedProfiles: ["readonly", "assistant", "editor", "publisher"],
           supportedClients: ["generic", "claude", "cursor", "codex", "opencode"],
-          toolCount: 28,
+          toolCount: 27,
         },
       },
     });
@@ -288,7 +288,6 @@ Module._load = function patchedLoad(request, parent, isMain) {
           { name: "chapters.get" },
           { name: "context.get" },
           { name: "bookmarks.list" },
-          { name: "skills.list" },
           { name: "notes.search" },
           { name: "notes.export" },
           { name: "knowledge.export" },
@@ -571,13 +570,13 @@ Module._load = function patchedLoad(request, parent, isMain) {
         builtBundle: true,
         desktopResourceBundle: false,
       },
-      tools: { count: 28 },
+      tools: { count: 27 },
       mcp: {
         defaultProfile: "readonly",
         serveArgs: ["mcp", "serve", "--profile", "readonly"],
         supportedProfiles: ["readonly", "assistant", "editor", "publisher"],
         supportedClients: ["generic", "claude", "cursor", "codex", "opencode"],
-        toolCount: 28,
+        toolCount: 27,
       },
       checks: expect.arrayContaining([
         expect.objectContaining({ name: "node-runtime", ok: true }),
@@ -780,7 +779,7 @@ Module._load = function patchedLoad(request, parent, isMain) {
     });
     expect(packagedEvidence.mcp).toMatchObject({
       serverName: "readany",
-      toolCount: 28,
+      toolCount: 27,
       hasSafetyMetadata: true,
     });
     expect(packagedEvidence.summary).toMatchObject({
@@ -863,9 +862,9 @@ Module._load = function patchedLoad(request, parent, isMain) {
           },
         }),
         "--tools-list-summary",
-        "readany tools/list captured 28 tools with risk scopes and minimumProfile metadata",
+        "readany tools/list captured 27 tools with risk scopes and minimumProfile metadata",
         "--tool-count",
-        "28",
+        "27",
         "--read-flow",
         "books.search, chapters.get, and rag.search returned bounded ReadAny results",
         "--readonly-denial",
@@ -948,7 +947,7 @@ Module._load = function patchedLoad(request, parent, isMain) {
         usesMcp: true,
       },
       mcp: {
-        toolCount: 28,
+        toolCount: 27,
         configRedacted: expect.stringContaining("readany"),
         toolsListSummary: expect.stringContaining("minimumProfile"),
       },
@@ -1028,7 +1027,7 @@ Module._load = function patchedLoad(request, parent, isMain) {
               },
             },
           },
-          tools: Array.from({ length: 28 }, (_, index) => ({
+          tools: Array.from({ length: 27 }, (_, index) => ({
             name: `readany.fixture.${index + 1}`,
             risk: index % 3 === 0 ? "write" : "read",
           })),
@@ -1088,7 +1087,7 @@ Module._load = function patchedLoad(request, parent, isMain) {
         skillInstalled: true,
         mcpProfile: "readonly",
         mcpClient: "codex",
-        toolCount: 28,
+        toolCount: 27,
         auditEntryCount: 1,
         commandSource: "fixture bundled CLI",
       },
@@ -1114,14 +1113,14 @@ Module._load = function patchedLoad(request, parent, isMain) {
       snapshot: {
         skill: { installed: true },
         mcp: { profile: "readonly", client: "codex", hasConfig: true },
-        tools: { count: 28 },
+        tools: { count: 27 },
         audit: { checked: true, entryCount: 1 },
       },
       summary: {
         completed: true,
         cliAvailable: true,
         skillInstalled: true,
-        toolCount: 28,
+        toolCount: 27,
       },
     });
 
@@ -1193,12 +1192,12 @@ Module._load = function patchedLoad(request, parent, isMain) {
     );
     expect(scaffoldRecord).toContain("distribution：builtBundle: true");
     expect(scaffoldRecord).toContain(
-      `| macOS | fixture packaged cli | CLI executable checked; installer install TBD | builtBundle: true / desktopResourceBundle: false / nativeBinary: false / usesNodeRuntime: true | install/status/uninstall pass | readany / tools: 28 / safety metadata: yes | export pass / spine: ${packagedEvidence.draftExport.exportedInspect.spineCount} / hash: ${packagedEvidence.draftExport.outputHash} | partial |`,
+      `| macOS | fixture packaged cli | CLI executable checked; installer install TBD | builtBundle: true / desktopResourceBundle: false / nativeBinary: false / usesNodeRuntime: true | install/status/uninstall pass | readany / tools: 27 / safety metadata: yes | export pass / spine: ${packagedEvidence.draftExport.exportedInspect.spineCount} / hash: ${packagedEvidence.draftExport.outputHash} | partial |`,
     );
     expect(scaffoldRecord).toContain("| Windows |  |  |  |  |  |  |  |");
     expect(scaffoldRecord).toContain("| Linux |  |  |  |  |  |  |  |");
     expect(scaffoldRecord).toContain(
-      `- packaged macOS：packageSource: fixture packaged cli / builtBundle: true / desktopResourceBundle: false / nativeBinary: false / usesNodeRuntime: true / MCP readany / tools: 28 / safety metadata: yes / draftExport export pass / spine: ${packagedEvidence.draftExport.exportedInspect.spineCount} / hash: ${packagedEvidence.draftExport.outputHash}`,
+      `- packaged macOS：packageSource: fixture packaged cli / builtBundle: true / desktopResourceBundle: false / nativeBinary: false / usesNodeRuntime: true / MCP readany / tools: 27 / safety metadata: yes / draftExport export pass / spine: ${packagedEvidence.draftExport.exportedInspect.spineCount} / hash: ${packagedEvidence.draftExport.outputHash}`,
     );
     expect(scaffoldRecord).toContain(
       "pnpm --filter @readany/cli acceptance:validate -- --record <acceptance-record.md> --evidence <evidence-json> --evidence <agent-evidence-json> --evidence <desktop-evidence-json> --evidence <macos-packaged-evidence-json> --evidence <windows-packaged-evidence-json> --evidence <linux-packaged-evidence-json> --strict-m5",
@@ -1210,22 +1209,22 @@ Module._load = function patchedLoad(request, parent, isMain) {
       "pnpm --filter @readany/cli acceptance:assemble -- --record <acceptance-record.md> --evidence <evidence-json> --evidence <agent-evidence-json> --evidence <desktop-evidence-json> --evidence <macos-packaged-evidence-json> --evidence <windows-packaged-evidence-json> --evidence <linux-packaged-evidence-json> --release <release-label> --reviewer <name> --output-dir <acceptance-bundle-dir>",
     );
     expect(scaffoldRecord).toContain(
-      "| Codex | fixture-1.0.0 | readonly/editor/publisher / MCP | tools: 28 / captured | books.search, chapters.get, and rag.search returned bounded ReadAny results | editor draft patch and publisher export completed to a new EPUB path | manual evidence captured |",
+      "| Codex | fixture-1.0.0 | readonly/editor/publisher / MCP | tools: 27 / captured | books.search, chapters.get, and rag.search returned bounded ReadAny results | editor draft patch and publisher export completed to a new EPUB path | manual evidence captured |",
     );
     expect(scaffoldRecord).toContain(
       "| Claude Desktop | fixture-2.0.0 | readonly/editor/publisher / CLI | CLI flow; MCP not used | CLI-backed client prompt listed books and read a chapter through the installed readany command | agent requested draft edit and export only after profile elevation was confirmed | manual evidence captured |",
     );
     expect(scaffoldRecord).toContain(
-      "- external agent Codex：version: fixture-1.0.0 / profile: readonly/editor/publisher / usesMcp: true / tools: 28 / readonly denial: readonly epub.export returned permission_denied before any draft output / audit: audit.list source=mcp showed bounded MCP operation summaries without full content",
+      "- external agent Codex：version: fixture-1.0.0 / profile: readonly/editor/publisher / usesMcp: true / tools: 27 / readonly denial: readonly epub.export returned permission_denied before any draft output / audit: audit.list source=mcp showed bounded MCP operation summaries without full content",
     );
     expect(scaffoldRecord).toContain(
-      "- 桌面设置页：CLI: available / Skill: installed / MCP: codex/readonly / tools: 28 / audit: 1 / source: fixture bundled CLI",
+      "- 桌面设置页：CLI: available / Skill: installed / MCP: codex/readonly / tools: 27 / audit: 1 / source: fixture bundled CLI",
     );
     expect(scaffoldRecord).toContain(
-      "| desktop-settings | resolved | CLI: available / Skill: installed / MCP: codex/readonly / tools: 28 / audit: 1 / source: fixture bundled CLI | Vitest |",
+      "| desktop-settings | resolved | CLI: available / Skill: installed / MCP: codex/readonly / tools: 27 / audit: 1 / source: fixture bundled CLI | Vitest |",
     );
     expect(scaffoldRecord).toContain(
-      "- desktop settings：CLI: available / Skill: installed / MCP: codex/readonly / tools: 28 / audit: 1 / source: fixture bundled CLI",
+      "- desktop settings：CLI: available / Skill: installed / MCP: codex/readonly / tools: 27 / audit: 1 / source: fixture bundled CLI",
     );
     expect(scaffoldRecord).toContain("sample-source | pending");
 
@@ -2067,9 +2066,9 @@ pnpm --filter @readany/cli acceptance:validate -- --strict-m5
           },
         }),
         "--tools-list-summary",
-        "readany tools/list captured 28 tools with risk scopes and minimumProfile metadata",
+        "readany tools/list captured 27 tools with risk scopes and minimumProfile metadata",
         "--tool-count",
-        "28",
+        "27",
         "--read-flow",
         "books.search, chapters.get, and rag.search returned bounded ReadAny results",
         "--readonly-denial",
@@ -2163,7 +2162,7 @@ pnpm --filter @readany/cli acceptance:validate -- --strict-m5
       summary: {
         cliAvailable: true,
         skillInstalled: true,
-        toolCount: 28,
+        toolCount: 27,
       },
     });
     const workspacePackagedMacos = spawnSync(
