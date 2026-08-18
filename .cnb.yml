@@ -88,3 +88,22 @@ $:
           script: |
             set -e
             cnb issues add-assignees --assignees $ISSUE_ASSIGNEE
+
+  # Tag 推送后同步到 GitHub，触发 GitHub Actions 发布构建（release.yml 监听 v* tag）。
+  # readany 是 Tauri 多平台桌面应用，安装包需在各平台 runner 上构建，故打 tag 后
+  # 通过 git-sync 把 tag 推送到 GitHub，自动触发各平台安装包生成。
+  tag_push:
+    - name: sync-tag-to-github
+      imports:
+        - https://cnb.cool/h1s97x/secret-env/-/blob/main/env.yml
+      stages:
+        - name: push tag to github
+          image: tencentcom/git-sync
+          settings:
+            target_url: https://github.com/h1s97x/readany.git
+            auth_type: https
+            username: ${GITHUB_USERNAME}
+            password: ${GITHUB_TOKEN}
+            branch: main
+            push_tags: true
+            sync_mode: rebase
