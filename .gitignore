@@ -7,11 +7,15 @@ dist/
 target/
 *.tsbuildinfo
 
-# IDE
+# IDE / Agent / AI 工具本地配置
 .vscode/
 .obsidian/
 .idea/
 .codebuddy/
+.agents/
+.claude/
+.trae-html-share-packages/
+.expo/
 *.swp
 *.swo
 *~
