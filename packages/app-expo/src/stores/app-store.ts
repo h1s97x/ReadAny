@@ -3,7 +3,7 @@
  */
 import { create } from "zustand";
 
-export type TabType = "home" | "reader" | "chat" | "notes" | "skills";
+export type TabType = "home" | "reader" | "notes";
 
 export interface Tab {
   id: string;
@@ -16,7 +16,7 @@ export interface Tab {
   lastActiveAt?: number;
 }
 
-export type SidebarTab = "chat" | "notes" | "toc" | "highlights" | "stats";
+export type SidebarTab = "notes" | "toc" | "highlights" | "stats";
 
 export type SettingsTab =
   | "general"
@@ -46,7 +46,7 @@ export const useAppStore = create<AppState>((set) => ({
   tabs: [{ id: "home", type: "home", title: "Home" }],
   activeTabId: "home",
   sidebarOpen: false,
-  sidebarTab: "chat",
+  sidebarTab: "notes",
   showSettings: false,
   settingsTab: "general",
 
